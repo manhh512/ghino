@@ -571,6 +571,77 @@
   padding:10px 0;
   border-bottom:1px solid var(--border);
 }
+
+/* ================= RANDOM WHEEL ================= */
+.random-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
+
+.wheel-container {
+  position:relative;
+  width:360px;
+  height:360px;
+}
+
+#wheel {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  border:8px solid var(--accent);
+  background:#111;
+  transition:transform 5s cubic-bezier(0.12, 0.8, 0.2, 1);
+  box-shadow:0 0 30px rgba(0,0,0,0.5);
+}
+
+.wheel-pointer {
+  position:absolute;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:18px solid transparent;
+  border-right:18px solid transparent;
+  border-top:40px solid var(--accent2);
+  z-index:10;
+}
+
+.random-list {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.random-row {
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.random-row input {
+  flex:1;
+}
+
+.random-percent {
+  width:60px;
+  text-align:center;
+  font-family:'IBM Plex Mono', monospace;
+  color:var(--accent3);
+  font-size:1.2rem;
+}
+
+.random-result {
+  font-family:'Bebas Neue', sans-serif;
+  font-size:2rem;
+  letter-spacing:2px;
+  color:var(--accent);
+  text-align:center;
+}
+
 </style>
 </head>
 <body>
@@ -588,6 +659,7 @@
   <button class="tab-btn" onclick="switchTab('food')">💵 Chia Tiền</button>
   <button class="tab-btn" onclick="switchTab('card')">🃏 Đánh Bài</button>
   <button class="tab-btn" onclick="switchTab('score', this)">🎲 Điểm</button>
+  <button class="tab-btn" onclick="switchTab('random', this)">🎡 Random</button>
   <button class="tab-btn" onclick="switchTab('log')">📋 Lịch Sử</button>
 </div>
 
@@ -626,6 +698,10 @@
         <div>
           <label>Số tiền (đ)</label>
           <input type="number" id="settle-amount" placeholder="0">
+        </div>
+        <div>
+          <label>Mục đích</label>
+          <input type="text" id="settle-purpose" placeholder="Ví dụ: trả tiền ăn, bài, cafe...">
         </div>
         <button class="btn btn-success" style="margin-bottom:0;padding:10px 18px;" onclick="settleDebt()">✔ GHI</button>
       </div>
@@ -780,6 +856,52 @@
 
 </div>
 
+  
+  <!-- ========== RANDOM ========== -->
+<div class="tab-panel" id="tab-random">
+
+  <div class="section-title">
+    <span class="icon">🎡</span> Random Wheel
+  </div>
+
+  <div class="card">
+
+    <div class="random-wrap">
+
+      <div class="wheel-container">
+        <div class="wheel-pointer"></div>
+        <canvas id="wheel" width="360" height="360"></canvas>
+      </div>
+
+      <button class="btn btn-primary" onclick="spinWheel()">
+        🎲 QUAY
+      </button>
+
+      <div class="random-result" id="random-result">
+        READY
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="card-label">NGƯỜI THAM GIA</div>
+
+    <div id="random-list" class="random-list"></div>
+
+    <div class="flex-end">
+      <button class="btn btn-ghost" onclick="addRandomPerson()">
+        + ADD
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+
   <!-- ========== LOG ========== -->
   <div class="tab-panel" id="tab-log">
     <div class="section-title"><span class="icon">📋</span> Lịch Sử</div>
@@ -864,6 +986,7 @@ window.addEventListener('load', async () => {
   renderFoodParticipants();
   renderCardSlots();
   renderScore();
+  renderRandomList();
 
   // Load from Firestore then listen for realtime changes
   try {
@@ -1250,6 +1373,7 @@ async function settleDebt() {
   const from = document.getElementById('settle-from').value;
   const to = document.getElementById('settle-to').value;
   const amount = parseFloat(document.getElementById('settle-amount').value) || 0;
+  const purpose = document.getElementById('settle-purpose').value.trim();
 
   if (from === to) {
     showToast('Người trả và nhận phải khác nhau!', true);
@@ -1269,7 +1393,8 @@ async function settleDebt() {
     date: new Date().toISOString(),
     from,
     to,
-    amount
+    amount,
+    purpose
   });
 
   _db.transactions.push({
@@ -1278,10 +1403,12 @@ async function settleDebt() {
     date: new Date().toISOString(),
     amount,
     payer: from,
-    details: `${from} trả ${to} ${fmt(amount)}`
+    purpose,
+    details: `${from} trả ${to} ${fmt(amount)}${purpose ? ' — ' + purpose : ''}`
   });
 
   document.getElementById('settle-amount').value = '';
+  document.getElementById('settle-purpose').value = '';
 
   showToast(`${from} đã trả ${to} ${fmt(amount)}`);
 
@@ -1405,12 +1532,14 @@ async function saveScoreData() {
       scoreHistory = d.history || [];
     }
     renderScore();
+  renderRandomList();
     onSnapshot(SCORE_DOC, (s) => {
       if (s.exists()) {
         const d = s.data();
         scorePlayers = d.players || [];
         scoreHistory = d.history || [];
         renderScore();
+  renderRandomList();
       }
     });
   } catch(e) { renderScore(); }
@@ -1461,6 +1590,7 @@ async function scoreAdd(id, input) {
   input.value = '';
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
 
 async function scoreRename(id, name) {
@@ -1483,6 +1613,7 @@ async function scoreAddPlayer() {
   scorePlayers.push({ id: crypto.randomUUID(), name: 'New', score: 0 });
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
 
 function scoreToggleDelete() {
@@ -1493,6 +1624,7 @@ function scoreToggleDelete() {
   btn.style.opacity = scoreDeleteMode ? '1' : '0.6';
 
   renderScore();
+  renderRandomList();
 }
 
 async function scoreDeletePlayer(id) {
@@ -1502,6 +1634,7 @@ async function scoreDeletePlayer(id) {
   scoreHistory = scoreHistory.filter(h => h.id !== id);
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
 
 async function scoreUndo() {
@@ -1511,6 +1644,7 @@ async function scoreUndo() {
   if (p) p.score -= last.value;
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
 
 async function scoreRemoveHistory(index) {
@@ -1520,6 +1654,7 @@ async function scoreRemoveHistory(index) {
   scoreHistory.splice(index, 1);
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
 
 function renderScoreHistory() {
@@ -1559,7 +1694,289 @@ async function scoreReset() {
   scoreHistory = [];
   await saveScoreData();
   renderScore();
+  renderRandomList();
 }
+
+// ===================== RANDOM WHEEL =====================
+let randomPlayers = [
+  'Tú',
+  'Mạnh',
+  'Hùng',
+  'Duy',
+  'Trâm'
+];
+
+let currentRotation = 0;
+
+function renderRandomList() {
+
+  const wrap = document.getElementById('random-list');
+
+  const weights = calculateWeights();
+
+  wrap.innerHTML = randomPlayers.map((p, index) => `
+    <div class="random-row">
+
+      <input
+        type="text"
+        value="${p}"
+        onchange="updateRandomName(${index}, this.value)"
+      >
+
+      <div class="random-percent">
+        🎲
+      </div>
+
+      <button
+        class="btn btn-danger"
+        onclick="removeRandomPerson(${index})">
+        X
+      </button>
+
+    </div>
+  `).join('');
+
+  drawWheel();
+}
+
+function addRandomPerson() {
+  randomPlayers.push('New');
+  renderRandomList();
+}
+
+function removeRandomPerson(index) {
+  randomPlayers.splice(index, 1);
+  renderRandomList();
+}
+
+function updateRandomName(index, value) {
+  randomPlayers[index] = value;
+  renderRandomList();
+}
+
+function calculateWeights() {
+
+  const weights = {};
+
+  if (randomPlayers.length === 0) return weights;
+
+  randomPlayers.forEach(p => weights[p] = 0);
+
+  const tuName = randomPlayers.find(p =>
+    p.trim().toLowerCase() === 'tú'
+  );
+
+  const balances = getBalances();
+
+  let maxDebtor = null;
+  let maxDebt = 0;
+
+  Object.entries(balances).forEach(([name, value]) => {
+    if (value < maxDebt) {
+      maxDebt = value;
+      maxDebtor = name;
+    }
+  });
+
+  if (tuName) {
+    weights[tuName] = 30;
+  }
+
+  if (maxDebtor && randomPlayers.includes(maxDebtor)) {
+
+    if (maxDebtor === tuName) {
+      weights[maxDebtor] = 30;
+    } else {
+      weights[maxDebtor] = 25;
+    }
+  }
+
+  const assigned = Object.values(weights)
+    .reduce((a,b)=>a+b,0);
+
+  const remainPlayers = randomPlayers.filter(p =>
+    weights[p] === 0
+  );
+
+  const remain = Math.max(0, 100 - assigned);
+
+  const each = remainPlayers.length > 0
+    ? remain / remainPlayers.length
+    : 0;
+
+  remainPlayers.forEach(p => {
+    weights[p] = each;
+  });
+
+  return weights;
+}
+
+function getBalances() {
+
+  const balance = {};
+
+  PEOPLE.forEach(p => balance[p] = 0);
+
+  _db.transactions.forEach(tx => {
+
+    if (tx.type === 'food') {
+
+      const share = Math.round(tx.amount / tx.participants.length);
+
+      tx.participants.forEach(p => {
+
+        if (p !== tx.payer) {
+          balance[p] -= share;
+          balance[tx.payer] += share;
+        }
+      });
+    }
+
+    else if (tx.type === 'card') {
+
+      tx.breakdown.forEach(b => {
+
+        if (b.person !== tx.payer) {
+          balance[b.person] -= b.amount;
+          balance[tx.payer] += b.amount;
+        }
+      });
+    }
+  });
+
+  _db.settlements.forEach(s => {
+    balance[s.from] += s.amount;
+    balance[s.to] -= s.amount;
+  });
+
+  return balance;
+}
+
+function drawWheel() {
+
+  const canvas = document.getElementById('wheel');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  const size = canvas.width;
+  const center = size / 2;
+  const radius = center - 8;
+
+  ctx.clearRect(0, 0, size, size);
+
+  const colors = [
+    '#e84a4a',
+    '#4ae8a0',
+    '#e8c84a',
+    '#9a4ae8',
+    '#4a9ae8',
+    '#e89a4a',
+    '#ff6b81',
+    '#2ed573'
+  ];
+
+  const total = randomPlayers.length;
+
+  if (total === 0) return;
+
+  const sliceAngle = (Math.PI * 2) / total;
+
+  for (let i = 0; i < total; i++) {
+
+    const startAngle = (-Math.PI / 2) + (i * sliceAngle);
+    const endAngle = startAngle + sliceAngle;
+    const midAngle = startAngle + (sliceAngle / 2);
+
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, startAngle, endAngle);
+    ctx.closePath();
+
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // TEXT
+    ctx.save();
+
+    ctx.translate(center, center);
+    ctx.rotate(midAngle);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillText(
+      randomPlayers[i],
+      radius * 0.45,
+      0
+    );
+
+    ctx.restore();
+  }
+}
+
+function weightedPick(weights) {
+
+  const rand = Math.random() * 100;
+
+  let cumulative = 0;
+
+  for (const name in weights) {
+
+    cumulative += weights[name];
+
+    if (rand <= cumulative) {
+      return name;
+    }
+  }
+
+  return Object.keys(weights)[0];
+}
+
+function spinWheel() {
+
+  if (randomPlayers.length === 0) return;
+
+  const weights = calculateWeights();
+
+  const winner = weightedPick(weights);
+
+  const canvas = document.getElementById('wheel');
+
+  const winnerIndex = randomPlayers.indexOf(winner);
+
+  const slice = 360 / randomPlayers.length;
+
+  // center angle của slice winner
+  const midAngle = -90 + (winnerIndex * slice) + (slice / 2);
+
+  // đưa midAngle về top pointer (0deg)
+  const neededRotation = 90 - (winnerIndex * slice) - (slice / 2);
+
+  const extraSpin = 360 * 6;
+
+  currentRotation += extraSpin + neededRotation;
+
+  canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+  setTimeout(() => {
+
+    document.getElementById('random-result').innerHTML = `
+      🎉 ${winner}
+    `;
+
+    showToast(`Random ra: ${winner}`);
+
+  }, 5200);
+}
+
+
 // ===================== UTILS =====================
 function fmt(n) {
   if (!n && n !== 0) return '0đ';
@@ -1581,7 +1998,8 @@ Object.assign(window, {
   saveFood, resetFood, setCardMode, toggleCardSlot, calcCardPreview, saveCard,
   resetCard, calcDebts, settleDebt, renderLog, deleteLog, clearLog, updateStats,
   scoreAdd, scoreRename, scoreEdit, scoreAddPlayer, scoreToggleDelete,
-  scoreDeletePlayer, scoreUndo, scoreRemoveHistory, scoreReset, populateSelect
+  scoreDeletePlayer, scoreUndo, scoreRemoveHistory, scoreReset, populateSelect,
+  addRandomPerson, removeRandomPerson, updateRandomName, spinWheel
 });
 </script>
 </body>
