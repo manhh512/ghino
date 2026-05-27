@@ -759,7 +759,10 @@
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
       <button class="btn btn-primary" onclick="scoreAddPlayer()">ADD</button>
-      <button class="btn btn-danger" onclick="scoreToggleDelete()" id="score-delete-btn">
+      <button class="btn btn-danger"
+        onclick="scoreToggleDelete()"
+        id="score-delete-btn"
+        style="opacity:0.6">
         DELETE
       </button>
       <button class="btn btn-ghost" onclick="scoreUndo()">UNDO</button>
@@ -1375,37 +1378,42 @@ function updateStats() {
   document.getElementById('stat-card').textContent = fmt(card);
   document.getElementById('stat-txns').textContent = db.transactions.length;
 }
-// ===================== SCORE (localStorage only) =====================
-const SCORE_LS_KEY = 'ghinoapp_score_v1';
-
-const _defaultScorePlayers = [
+// ===================== SCORE =====================
+let scorePlayers = [
   { id: crypto.randomUUID(), name:'Hùng', score:0 },
   { id: crypto.randomUUID(), name:'Duy', score:0 },
   { id: crypto.randomUUID(), name:'Mạnh', score:0 },
   { id: crypto.randomUUID(), name:'Tú', score:0 },
 ];
 
-let scorePlayers = _defaultScorePlayers;
 let scoreHistory = [];
 let scoreDeleteMode = false;
 
-function saveScoreData() {
+async function saveScoreData() {
   try {
-    localStorage.setItem(SCORE_LS_KEY, JSON.stringify({ players: scorePlayers, history: scoreHistory }));
+    await setDoc(SCORE_DOC, { players: scorePlayers, history: scoreHistory });
   } catch(e) { console.error('Score save error', e); }
 }
 
-// Load score from localStorage on init
-(function() {
+// Load score from Firestore on init
+(async () => {
   try {
-    const raw = localStorage.getItem(SCORE_LS_KEY);
-    if (raw) {
-      const d = JSON.parse(raw);
+    const snap = await getDoc(SCORE_DOC);
+    if (snap.exists()) {
+      const d = snap.data();
       scorePlayers = d.players || scorePlayers;
       scoreHistory = d.history || [];
     }
-  } catch(e) {}
-  renderScore();
+    renderScore();
+    onSnapshot(SCORE_DOC, (s) => {
+      if (s.exists()) {
+        const d = s.data();
+        scorePlayers = d.players || [];
+        scoreHistory = d.history || [];
+        renderScore();
+      }
+    });
+  } catch(e) { renderScore(); }
 })();
 
 function renderScore() {
@@ -1419,6 +1427,8 @@ function renderScore() {
         class="score-add"
         type="number"
         placeholder="+"
+        enterkeyhint="done"
+        onkeydown="if(event.key==='Enter'){ this.blur(); }"
         onblur="window.scoreAdd('${p.id}', this)"
       >
 
@@ -1441,7 +1451,7 @@ function renderScore() {
   renderScoreHistory();
 }
 
-function scoreAdd(id, input) {
+async function scoreAdd(id, input) {
   const val = parseInt(input.value);
   if (isNaN(val)) { input.value = ''; return; }
   const p = scorePlayers.find(x => x.id === id);
@@ -1449,29 +1459,29 @@ function scoreAdd(id, input) {
   p.score += val;
   scoreHistory.push({ id, value: val, date: Date.now() });
   input.value = '';
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 
-function scoreRename(id, name) {
+async function scoreRename(id, name) {
   const p = scorePlayers.find(x => x.id === id);
   if (!p) return;
   p.name = name;
-  saveScoreData();
+  await saveScoreData();
 }
 
-function scoreEdit(id, value) {
+async function scoreEdit(id, value) {
   const p = scorePlayers.find(x => x.id === id);
   if (!p) return;
   const val = parseInt(value);
   if (isNaN(val)) return;
   p.score = val;
-  saveScoreData();
+  await saveScoreData();
 }
 
-function scoreAddPlayer() {
+async function scoreAddPlayer() {
   scorePlayers.push({ id: crypto.randomUUID(), name: 'New', score: 0 });
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 
@@ -1485,30 +1495,30 @@ function scoreToggleDelete() {
   renderScore();
 }
 
-function scoreDeletePlayer(id) {
+async function scoreDeletePlayer(id) {
   if (!scoreDeleteMode) return;
   if (!confirm('Xóa người này?')) return;
   scorePlayers = scorePlayers.filter(p => p.id !== id);
   scoreHistory = scoreHistory.filter(h => h.id !== id);
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 
-function scoreUndo() {
+async function scoreUndo() {
   if (scoreHistory.length === 0) return;
   const last = scoreHistory.pop();
   const p = scorePlayers.find(x => x.id === last.id);
   if (p) p.score -= last.value;
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 
-function scoreRemoveHistory(index) {
+async function scoreRemoveHistory(index) {
   const item = scoreHistory[index];
   const p = scorePlayers.find(x => x.id === item.id);
   if (p) p.score -= item.value;
   scoreHistory.splice(index, 1);
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 
@@ -1543,11 +1553,11 @@ function renderScoreHistory() {
   }).join('');
 }
 
-function scoreReset() {
+async function scoreReset() {
   if (!confirm('Reset toàn bộ điểm?')) return;
   scorePlayers = [];
   scoreHistory = [];
-  saveScoreData();
+  await saveScoreData();
   renderScore();
 }
 // ===================== UTILS =====================
