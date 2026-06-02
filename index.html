@@ -718,10 +718,22 @@
   <div style="display:flex;align-items:center;gap:16px;">
     <div id="sync-status" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:1px;color:var(--accent3);">⟳ Đang tải...</div>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:1px;" id="date-display"></div>
-    <div id="current-user-badge" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
-      background:#1e2a0a;border:1px solid #4ae8a0;border-radius:4px;padding:4px 10px;
-      color:#4ae8a0;letter-spacing:1px;cursor:pointer;" onclick="doLogout()" title="Click để đăng xuất">
-      👤 <span id="current-user-name"></span>
+    <div id="current-user-badge" style="display:none;align-items:center;gap:8px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+        background:#1e2a0a;border:1px solid #4ae8a0;border-radius:4px;padding:4px 10px;
+        color:#4ae8a0;letter-spacing:1px;">
+        👤 <span id="current-user-name"></span>
+      </div>
+      <button onclick="changePassword()" title="Đổi mật khẩu" style="
+        background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;
+        color:#888;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace;
+        transition:all 0.15s;" onmouseover="this.style.borderColor='#9a4ae8';this.style.color='#9a4ae8'"
+        onmouseout="this.style.borderColor='#444';this.style.color='#888'">🔒</button>
+      <button onclick="doLogout()" title="Đăng xuất" style="
+        background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;
+        color:#888;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace;
+        transition:all 0.15s;" onmouseover="this.style.borderColor='#e84a4a';this.style.color='#e84a4a'"
+        onmouseout="this.style.borderColor='#444';this.style.color='#888'">🚪</button>
     </div>
   </div>
 </header>
@@ -914,11 +926,10 @@
         style="opacity:0.6">
         DELETE
       </button>
-      <button class="btn btn-ghost" onclick="scoreUndo()">UNDO</button>
       <button class="btn btn-danger" onclick="scoreReset()">RESET</button>
     </div>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;">
-      🔒 UNDO · DELETE · RESET yêu cầu mật khẩu
+      🔒 DELETE người · RESET yêu cầu mật khẩu · Bấm X trong lịch sử để undo
     </div>
 
     <div id="score-players"></div>
@@ -1010,17 +1021,14 @@
           style="flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;padding:8px 10px;outline:none;">
           <option value="">Tất cả loại</option>
           <option value="login">Đăng nhập</option>
+          <option value="login_fail">Đăng nhập thất bại</option>
           <option value="logout">Đăng xuất</option>
+          <option value="change_password">Đổi mật khẩu</option>
           <option value="save_food">Lưu chia tiền</option>
           <option value="save_card">Lưu đánh bài</option>
           <option value="settle">Thanh toán</option>
           <option value="delete_tx">Xóa giao dịch</option>
-          <option value="score_add">Cộng điểm</option>
-          <option value="score_undo">Undo điểm</option>
-          <option value="score_delete">Xóa log điểm</option>
-          <option value="score_reset">Reset điểm</option>
         </select>
-        <button class="btn btn-ghost" onclick="document.getElementById('audit-filter-user').value='';document.getElementById('audit-filter-type').value='';renderAudit()">CLEAR</button>
       </div>
     </div>
 
@@ -1055,6 +1063,7 @@ const db_firebase = getFirestore(app);
 const DB_DOC = doc(db_firebase, 'ghino', 'main');
 const SCORE_DOC = doc(db_firebase, 'ghino', 'score');
 const AUDIT_DOC = doc(db_firebase, 'ghino', 'audit');
+const PASSWD_DOC = doc(db_firebase, 'ghino', 'passwords');
 
 // Local cache
 let _db = { transactions: [], settlements: [] };
@@ -1082,10 +1091,36 @@ async function saveDB(data) {
 const PEOPLE = ['Mạnh','Hùng','Tú','Duy','Trâm'];
 
 // ===================== AUTH =====================
-const ACCOUNTS = { manh:'123', hung:'123', tu:'123', duy:'123', tram:'123' };
+let ACCOUNTS = { manh:'123', hung:'123', tu:'123', duy:'123', tram:'123' };
 const ACCOUNT_LABELS = { manh:'Mạnh', hung:'Hùng', tu:'Tú', duy:'Duy', tram:'Trâm' };
 let currentUser = null;
 let auditLog = [];
+
+async function loadPasswords() {
+  try {
+    const snap = await getDoc(PASSWD_DOC);
+    if (snap.exists()) Object.assign(ACCOUNTS, snap.data());
+  } catch(e) {}
+}
+
+async function savePasswords() {
+  try { await setDoc(PASSWD_DOC, ACCOUNTS); } catch(e) {}
+}
+
+async function changePassword() {
+  if (!currentUser) return;
+  const oldPw = prompt('Mật khẩu hiện tại:');
+  if (oldPw === null) return;
+  if (ACCOUNTS[currentUser] !== oldPw) { showToast('Sai mật khẩu hiện tại!', true); return; }
+  const newPw = prompt('Mật khẩu mới (tối thiểu 2 ký tự):');
+  if (!newPw || newPw.length < 2) { showToast('Mật khẩu quá ngắn!', true); return; }
+  const confirmPw = prompt('Nhập lại mật khẩu mới:');
+  if (newPw !== confirmPw) { showToast('Mật khẩu không khớp!', true); return; }
+  ACCOUNTS[currentUser] = newPw;
+  await savePasswords();
+  auditEvent('change_password', `${ACCOUNT_LABELS[currentUser]} doi mat khau`);
+  showToast('Đổi mật khẩu thành công!');
+}
 
 let _selectedLoginUser = '';
 function selectLoginUser(u) {
@@ -1104,13 +1139,13 @@ async function loadAudit() {
 
 async function saveAuditEntry(entry) {
   auditLog.push(entry);
-  // Keep max 500 entries
-  if (auditLog.length > 500) auditLog = auditLog.slice(-500);
   try { await setDoc(AUDIT_DOC, { log: auditLog }); } catch(e) {}
 }
 
 function auditEvent(type, detail = '') {
   if (!currentUser) return;
+  // Skip score-related events
+  if (['score_add','score_undo','score_delete','score_reset'].includes(type)) return;
   const entry = {
     id: crypto.randomUUID(),
     user: currentUser,
@@ -1170,14 +1205,11 @@ const AUDIT_TYPE_LABELS = {
   login: { icon:'🔑', label:'Đăng nhập', color:'#4ae8a0' },
   login_fail: { icon:'❌', label:'Đăng nhập thất bại', color:'#e84a4a' },
   logout: { icon:'🚪', label:'Đăng xuất', color:'#888' },
+  change_password: { icon:'🔒', label:'Đổi mật khẩu', color:'#9a4ae8' },
   save_food: { icon:'💵', label:'Lưu chia tiền', color:'#e8c84a' },
   save_card: { icon:'🃏', label:'Lưu đánh bài', color:'#e89a4a' },
   settle: { icon:'✅', label:'Thanh toán nợ', color:'#4a9ae8' },
   delete_tx: { icon:'🗑', label:'Xóa giao dịch', color:'#e84a4a' },
-  score_add: { icon:'➕', label:'Cộng điểm', color:'#4ae8a0' },
-  score_undo: { icon:'↩️', label:'Undo điểm', color:'#9a4ae8' },
-  score_delete: { icon:'🗑', label:'Xóa log điểm', color:'#e84a4a' },
-  score_reset: { icon:'💥', label:'Reset điểm', color:'#e84a4a' },
 };
 
 function renderAudit() {
@@ -1227,6 +1259,8 @@ window.addEventListener('load', async () => {
 
   // Load audit
   await loadAudit();
+  // Load passwords from Firestore
+  await loadPasswords();
 
   // Restore session if previously logged in
   const savedUser = sessionStorage.getItem('ghino_user');
@@ -1885,9 +1919,6 @@ async function scoreAddPlayer() {
 }
 
 function scoreToggleDelete() {
-  if (!scoreDeleteMode) {
-    if (!requirePassword()) return;
-  }
   scoreDeleteMode = !scoreDeleteMode;
   const btn = document.getElementById('score-delete-btn');
   btn.style.opacity = scoreDeleteMode ? '1' : '0.6';
@@ -1897,6 +1928,7 @@ function scoreToggleDelete() {
 
 async function scoreDeletePlayer(id) {
   if (!scoreDeleteMode) return;
+  if (!requirePassword()) return;
   if (!confirm('Xóa người này?')) return;
   scorePlayers = scorePlayers.filter(p => p.id !== id);
   scoreHistory = scoreHistory.filter(h => h.id !== id);
@@ -1906,38 +1938,33 @@ async function scoreDeletePlayer(id) {
 }
 
 function requirePassword() {
-  const pw = prompt('Nhap mat khau:');
-  if (pw !== '1') { showToast('Sai mat khau!', true); return false; }
+  const pw = prompt('Nhập mật khẩu tài khoản của bạn:');
+  if (!currentUser || ACCOUNTS[currentUser] !== pw) { showToast('Sai mật khẩu!', true); return false; }
   return true;
 }
 
 async function scoreUndo() {
-  // Find last "add" entry that has not been undone yet
+  // kept for internal use, not exposed via button
   const undoneTargets = scoreHistory.filter(h => h.type === 'undo').map(h => h.target);
   const lastAction = [...scoreHistory].reverse().find(h => h.type !== 'undo' && h.type !== 'delete' && !undoneTargets.includes(h.entryId));
-  if (!lastAction) { showToast('Khong co gi de undo', true); return; }
-  if (!requirePassword()) return;
+  if (!lastAction) { showToast('Không có gì để undo', true); return; }
   const p = scorePlayers.find(x => x.id === lastAction.id);
   if (p) p.score -= lastAction.value;
   scoreHistory.push({ type: 'undo', target: lastAction.entryId, id: lastAction.id, value: lastAction.value, date: Date.now() });
-  auditEvent('score_undo', `Undo +${lastAction.value} cua ${p ? p.name : '?'}`);
   await saveScoreData();
   renderScore();
   renderRandomList();
 }
 
 async function scoreRemoveHistory(entryId) {
-  if (!requirePassword()) return;
+  // X button = undo that entry, no password needed
   const item = scoreHistory.find(h => h.entryId === entryId);
   if (!item) return;
-  // Check if already undone
   const alreadyUndone = scoreHistory.some(h => h.type === 'undo' && h.target === entryId);
-  if (!alreadyUndone) {
-    const p = scorePlayers.find(x => x.id === item.id);
-    if (p) p.score -= item.value;
-  }
-  scoreHistory.push({ type: 'delete', target: entryId, id: item.id, value: item.value, date: Date.now() });
-  auditEvent('score_delete', `Xoa log +${item.value} cua ${p ? p.name : '?'}`);
+  if (alreadyUndone) return;
+  const p = scorePlayers.find(x => x.id === item.id);
+  if (p) p.score -= item.value;
+  scoreHistory.push({ type: 'undo', target: entryId, id: item.id, value: item.value, date: Date.now() });
   await saveScoreData();
   renderScore();
   renderRandomList();
@@ -1946,48 +1973,45 @@ async function scoreRemoveHistory(entryId) {
 function renderScoreHistory() {
   const h = document.getElementById('score-history');
 
-  // Filter out meta-entries for display, show only add entries + annotations
   const addEntries = scoreHistory.filter(item => item.type === 'add' || (!item.type));
   const deletedTargets = new Set(scoreHistory.filter(h => h.type === 'delete').map(h => h.target));
   const undoneTargets = new Set(scoreHistory.filter(h => h.type === 'undo').map(h => h.target));
 
   if (addEntries.length === 0) {
-    h.innerHTML = '<div class="empty">Chua co lich su</div>';
+    h.innerHTML = '<div class="empty">Chưa có lịch sử</div>';
     return;
   }
 
   h.innerHTML = addEntries.slice().reverse().map((item) => {
     const p = scorePlayers.find(x => x.id === item.id);
-    const entryId = item.entryId || item.id + '_' + item.date;
     const isDeleted = deletedTargets.has(item.entryId);
     const isUndone = undoneTargets.has(item.entryId);
 
     let statusBadge = '';
     if (isDeleted) {
-      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--accent2);margin-left:6px;opacity:0.8;">DELETED</span>';
+      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--accent2);margin-left:6px;">DELETED</span>';
     } else if (isUndone) {
-      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--muted);margin-left:6px;opacity:0.8;">UNDO</span>';
+      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--muted);margin-left:6px;">↩ UNDONE</span>';
     }
 
-    const nameStyle = (isDeleted || isUndone)
-      ? 'text-decoration:line-through;opacity:0.45;'
-      : '';
+    const nameStyle = (isDeleted || isUndone) ? 'text-decoration:line-through;opacity:0.4;' : '';
 
-    const deleteBtn = (!isDeleted && !isUndone)
-      ? `<button class="btn btn-danger" onclick="window.scoreRemoveHistory('${item.entryId}')">X</button>`
-      : `<span style="width:44px;display:inline-block;"></span>`;
+    const actionBtn = (!isDeleted && !isUndone)
+      ? `<button class="btn btn-ghost" style="font-size:0.7rem;padding:5px 10px;color:var(--muted);"
+           onclick="window.scoreRemoveHistory('${item.entryId}')">↩ Undo</button>`
+      : `<span style="width:62px;display:inline-block;"></span>`;
 
     const date = item.date ? new Date(item.date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
 
     return `
-      <div class="score-history-item" style="${isDeleted || isUndone ? 'opacity:0.55;' : ''}">
+      <div class="score-history-item" style="${isDeleted || isUndone ? 'opacity:0.5;' : ''}">
         <div style="${nameStyle}">
           <strong>${p ? p.name : '?'}</strong>
-          <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent3);">+${item.value}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent3);margin-left:4px;">+${item.value}</span>
           ${statusBadge}
           ${date ? `<span style="font-size:0.68rem;color:var(--muted);margin-left:8px;">${date}</span>` : ''}
         </div>
-        ${deleteBtn}
+        ${actionBtn}
       </div>
     `;
   }).join('');
@@ -2250,7 +2274,7 @@ Object.assign(window, {
   scoreAdd, scoreRename, scoreEdit, scoreAddPlayer, scoreToggleDelete,
   scoreDeletePlayer, scoreUndo, scoreRemoveHistory, scoreReset, populateSelect,
   addRandomPerson, removeRandomPerson, updateRandomName, spinWheel,
-  selectLoginUser, doLogin, doLogout, renderAudit
+  selectLoginUser, doLogin, doLogout, renderAudit, changePassword
 });
 </script>
 </body>
