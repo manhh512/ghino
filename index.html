@@ -646,11 +646,83 @@
 </head>
 <body>
 
+<!-- ========== LOGIN OVERLAY ========== -->
+<div id="login-overlay" style="
+  position:fixed;inset:0;background:#0a0a0a;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'IBM Plex Sans',sans-serif;
+">
+  <div style="text-align:center;margin-bottom:36px;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:4px;color:#e8c84a;">
+      GHI <span style="color:#e84a4a;">NỢ</span>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:2px;color:#555;margin-top:6px;">
+      ĐĂNG NHẬP ĐỂ TIẾP TỤC
+    </div>
+  </div>
+
+  <div style="background:#161616;border:1px solid #2e2e2e;border-radius:10px;padding:32px;width:90%;max-width:360px;">
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#666;margin-bottom:8px;">TÀI KHOẢN</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="login-user-chips">
+        <div class="login-chip" onclick="selectLoginUser('manh')" data-user="manh">Mạnh</div>
+        <div class="login-chip" onclick="selectLoginUser('hung')" data-user="hung">Hùng</div>
+        <div class="login-chip" onclick="selectLoginUser('tu')" data-user="tu">Tú</div>
+        <div class="login-chip" onclick="selectLoginUser('duy')" data-user="duy">Duy</div>
+        <div class="login-chip" onclick="selectLoginUser('tram')" data-user="tram">Trâm</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#666;margin-bottom:8px;">MẬT KHẨU</label>
+      <input id="login-password" type="password" placeholder="••••••"
+        style="width:100%;background:#0f0f0f;border:1px solid #2e2e2e;border-radius:6px;color:#f0ede6;
+               font-family:'IBM Plex Mono',monospace;font-size:1rem;padding:12px 14px;outline:none;
+               transition:border-color 0.15s;"
+        onfocus="this.style.borderColor='#e8c84a'" onblur="this.style.borderColor='#2e2e2e'"
+        onkeydown="if(event.key==='Enter') doLogin()"
+      >
+    </div>
+
+    <div id="login-error" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+      color:#e84a4a;margin-bottom:14px;letter-spacing:0.5px;"></div>
+
+    <button onclick="doLogin()" style="
+      width:100%;background:#e8c84a;color:#111;border:none;border-radius:6px;
+      font-family:'IBM Plex Mono',monospace;font-size:0.85rem;font-weight:700;
+      letter-spacing:2px;text-transform:uppercase;padding:14px;cursor:pointer;
+      transition:background 0.15s;
+    " onmouseover="this.style.background='#f0d060'" onmouseout="this.style.background='#e8c84a'">
+      ĐĂNG NHẬP
+    </button>
+  </div>
+
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:#333;margin-top:24px;letter-spacing:1px;">
+    v2.0 · GHI NỢ SYSTEM
+  </div>
+</div>
+
+<style>
+.login-chip {
+  font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:600;
+  padding:8px 16px;border-radius:4px;border:1.5px solid #2e2e2e;
+  background:#222;color:#666;cursor:pointer;transition:all 0.12s;user-select:none;
+  letter-spacing:0.5px;
+}
+.login-chip:hover { border-color:#e8c84a;color:#e8c84a; }
+.login-chip.active { background:#1e2a0a;border-color:#4ae8a0;color:#4ae8a0; }
+</style>
+
 <header>
   <div class="logo">GHI <span>NỢ</span></div>
   <div style="display:flex;align-items:center;gap:16px;">
     <div id="sync-status" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:1px;color:var(--accent3);">⟳ Đang tải...</div>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:1px;" id="date-display"></div>
+    <div id="current-user-badge" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+      background:#1e2a0a;border:1px solid #4ae8a0;border-radius:4px;padding:4px 10px;
+      color:#4ae8a0;letter-spacing:1px;cursor:pointer;" onclick="doLogout()" title="Click để đăng xuất">
+      👤 <span id="current-user-name"></span>
+    </div>
   </div>
 </header>
 
@@ -661,6 +733,7 @@
   <button class="tab-btn" onclick="switchTab('score', this)">🎲 Điểm</button>
   <button class="tab-btn" onclick="switchTab('random', this)">🎡 Random</button>
   <button class="tab-btn" onclick="switchTab('log')">📋 Lịch Sử</button>
+  <button class="tab-btn" onclick="switchTab('audit')">🔐 Audit</button>
 </div>
 
 <main>
@@ -844,6 +917,9 @@
       <button class="btn btn-ghost" onclick="scoreUndo()">UNDO</button>
       <button class="btn btn-danger" onclick="scoreReset()">RESET</button>
     </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;">
+      🔒 UNDO · DELETE · RESET yêu cầu mật khẩu
+    </div>
 
     <div id="score-players"></div>
 
@@ -914,6 +990,46 @@
     </div>
   </div>
 
+  <!-- ========== AUDIT ========== -->
+  <div class="tab-panel" id="tab-audit">
+    <div class="section-title"><span class="icon">🔐</span> Audit Log</div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-label">BỘ LỌC</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+        <select id="audit-filter-user" onchange="renderAudit()"
+          style="flex:1;min-width:120px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;padding:8px 10px;outline:none;">
+          <option value="">Tất cả user</option>
+          <option value="manh">Mạnh</option>
+          <option value="hung">Hùng</option>
+          <option value="tu">Tú</option>
+          <option value="duy">Duy</option>
+          <option value="tram">Trâm</option>
+        </select>
+        <select id="audit-filter-type" onchange="renderAudit()"
+          style="flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;padding:8px 10px;outline:none;">
+          <option value="">Tất cả loại</option>
+          <option value="login">Đăng nhập</option>
+          <option value="logout">Đăng xuất</option>
+          <option value="save_food">Lưu chia tiền</option>
+          <option value="save_card">Lưu đánh bài</option>
+          <option value="settle">Thanh toán</option>
+          <option value="delete_tx">Xóa giao dịch</option>
+          <option value="score_add">Cộng điểm</option>
+          <option value="score_undo">Undo điểm</option>
+          <option value="score_delete">Xóa log điểm</option>
+          <option value="score_reset">Reset điểm</option>
+        </select>
+        <button class="btn btn-ghost" onclick="document.getElementById('audit-filter-user').value='';document.getElementById('audit-filter-type').value='';renderAudit()">CLEAR</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="audit-count" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:1px;margin-bottom:14px;">0 sự kiện</div>
+      <div id="audit-list"><div class="empty">Chưa có dữ liệu audit</div></div>
+    </div>
+  </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
@@ -938,6 +1054,7 @@ const app = initializeApp(firebaseConfig);
 const db_firebase = getFirestore(app);
 const DB_DOC = doc(db_firebase, 'ghino', 'main');
 const SCORE_DOC = doc(db_firebase, 'ghino', 'score');
+const AUDIT_DOC = doc(db_firebase, 'ghino', 'audit');
 
 // Local cache
 let _db = { transactions: [], settlements: [] };
@@ -964,6 +1081,139 @@ async function saveDB(data) {
 // ===================== DATA =====================
 const PEOPLE = ['Mạnh','Hùng','Tú','Duy','Trâm'];
 
+// ===================== AUTH =====================
+const ACCOUNTS = { manh:'123', hung:'123', tu:'123', duy:'123', tram:'123' };
+const ACCOUNT_LABELS = { manh:'Mạnh', hung:'Hùng', tu:'Tú', duy:'Duy', tram:'Trâm' };
+let currentUser = null;
+let auditLog = [];
+
+let _selectedLoginUser = '';
+function selectLoginUser(u) {
+  _selectedLoginUser = u;
+  document.querySelectorAll('.login-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.user === u);
+  });
+}
+
+async function loadAudit() {
+  try {
+    const snap = await getDoc(AUDIT_DOC);
+    if (snap.exists()) auditLog = snap.data().log || [];
+  } catch(e) { auditLog = []; }
+}
+
+async function saveAuditEntry(entry) {
+  auditLog.push(entry);
+  // Keep max 500 entries
+  if (auditLog.length > 500) auditLog = auditLog.slice(-500);
+  try { await setDoc(AUDIT_DOC, { log: auditLog }); } catch(e) {}
+}
+
+function auditEvent(type, detail = '') {
+  if (!currentUser) return;
+  const entry = {
+    id: crypto.randomUUID(),
+    user: currentUser,
+    userLabel: ACCOUNT_LABELS[currentUser],
+    type,
+    detail,
+    ts: Date.now(),
+    date: new Date().toISOString()
+  };
+  saveAuditEntry(entry);
+  return entry;
+}
+
+async function doLogin() {
+  const u = _selectedLoginUser;
+  const pw = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+
+  if (!u) { errEl.textContent = 'Vui lòng chọn tài khoản!'; errEl.style.display='block'; return; }
+  if (!pw) { errEl.textContent = 'Vui lòng nhập mật khẩu!'; errEl.style.display='block'; return; }
+  if (ACCOUNTS[u] !== pw) {
+    errEl.textContent = 'Sai mật khẩu!'; errEl.style.display='block';
+    document.getElementById('login-password').value = '';
+    // Log failed attempt
+    await saveAuditEntry({ id: crypto.randomUUID(), user: u, userLabel: ACCOUNT_LABELS[u], type:'login_fail', detail:'Sai mat khau', ts: Date.now(), date: new Date().toISOString() });
+    return;
+  }
+
+  currentUser = u;
+  sessionStorage.setItem('ghino_user', u);
+
+  // Show app, hide login
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('current-user-badge').style.display = 'flex';
+  document.getElementById('current-user-name').textContent = ACCOUNT_LABELS[u].toUpperCase();
+
+  // Audit login
+  await saveAuditEntry({ id: crypto.randomUUID(), user: u, userLabel: ACCOUNT_LABELS[u], type:'login', detail:'Dang nhap thanh cong', ts: Date.now(), date: new Date().toISOString() });
+
+  showToast('Xin chào ' + ACCOUNT_LABELS[u] + '!');
+}
+
+async function doLogout() {
+  if (!confirm('Đăng xuất?')) return;
+  auditEvent('logout', 'Dang xuat');
+  await new Promise(r => setTimeout(r, 300));
+  currentUser = null;
+  sessionStorage.removeItem('ghino_user');
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('current-user-badge').style.display = 'none';
+  document.getElementById('login-password').value = '';
+  _selectedLoginUser = '';
+  document.querySelectorAll('.login-chip').forEach(c => c.classList.remove('active'));
+}
+
+const AUDIT_TYPE_LABELS = {
+  login: { icon:'🔑', label:'Đăng nhập', color:'#4ae8a0' },
+  login_fail: { icon:'❌', label:'Đăng nhập thất bại', color:'#e84a4a' },
+  logout: { icon:'🚪', label:'Đăng xuất', color:'#888' },
+  save_food: { icon:'💵', label:'Lưu chia tiền', color:'#e8c84a' },
+  save_card: { icon:'🃏', label:'Lưu đánh bài', color:'#e89a4a' },
+  settle: { icon:'✅', label:'Thanh toán nợ', color:'#4a9ae8' },
+  delete_tx: { icon:'🗑', label:'Xóa giao dịch', color:'#e84a4a' },
+  score_add: { icon:'➕', label:'Cộng điểm', color:'#4ae8a0' },
+  score_undo: { icon:'↩️', label:'Undo điểm', color:'#9a4ae8' },
+  score_delete: { icon:'🗑', label:'Xóa log điểm', color:'#e84a4a' },
+  score_reset: { icon:'💥', label:'Reset điểm', color:'#e84a4a' },
+};
+
+function renderAudit() {
+  const filterUser = document.getElementById('audit-filter-user').value;
+  const filterType = document.getElementById('audit-filter-type').value;
+
+  let entries = [...auditLog].reverse();
+  if (filterUser) entries = entries.filter(e => e.user === filterUser);
+  if (filterType) entries = entries.filter(e => e.type === filterType);
+
+  document.getElementById('audit-count').textContent = entries.length + ' sự kiện';
+
+  if (entries.length === 0) {
+    document.getElementById('audit-list').innerHTML = '<div class="empty">Không có dữ liệu</div>';
+    return;
+  }
+
+  document.getElementById('audit-list').innerHTML = entries.map(e => {
+    const meta = AUDIT_TYPE_LABELS[e.type] || { icon:'•', label: e.type, color:'#888' };
+    const dt = new Date(e.ts);
+    const timeStr = dt.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    return `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #1e1e1e;">
+        <div style="font-size:1.1rem;margin-top:1px;flex-shrink:0;">${meta.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.8rem;font-weight:700;color:${meta.color};">${meta.label}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;background:#222;border-radius:3px;padding:2px 7px;color:#ccc;">${e.userLabel || e.user}</span>
+          </div>
+          ${e.detail ? `<div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.78rem;color:#888;margin-top:3px;">${e.detail}</div>` : ''}
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:#444;margin-top:4px;letter-spacing:0.5px;">${timeStr}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 // ===================== INIT =====================
 let cardMode = '532';
 let cardSlotSelection = { 50:[], 30:[], 20:[], 40:[], '30b':[], '20b':[], 10:[] };
@@ -974,6 +1224,18 @@ window.addEventListener('load', async () => {
   const now = new Date();
   document.getElementById('date-display').textContent =
     now.toLocaleDateString('vi-VN', {weekday:'long', day:'2-digit', month:'2-digit', year:'numeric'}).toUpperCase();
+
+  // Load audit
+  await loadAudit();
+
+  // Restore session if previously logged in
+  const savedUser = sessionStorage.getItem('ghino_user');
+  if (savedUser && ACCOUNTS[savedUser]) {
+    currentUser = savedUser;
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('current-user-badge').style.display = 'flex';
+    document.getElementById('current-user-name').textContent = ACCOUNT_LABELS[savedUser].toUpperCase();
+  }
 
   showStatus('⟳ Đang kết nối...', true);
 
@@ -1032,6 +1294,7 @@ function switchTab(tab) {
   event.currentTarget.classList.add('active');
   if (tab === 'home') { calcDebts(); updateStats(); }
   if (tab === 'log') renderLog();
+  if (tab === 'audit') renderAudit();
 }
 
 // ===================== FOOD =====================
@@ -1113,6 +1376,7 @@ async function saveFood() {
     details: `${purposeLabel}Chia đều ${foodSelected.join(', ')} — ${fmt(share)}/người`
   });
   showToast('Đã chia tiền!');
+  auditEvent('save_food', `${fmt(amount)} — ${payer} trả — ${foodSelected.join(', ')}`);
   resetFood();
   renderLog();
   updateStats();
@@ -1256,6 +1520,7 @@ async function saveCard() {
     details: breakdown.map(b => `${b.person}:${Math.round(b.pct*100)}%`).join(', ')
   });
   showToast('Đã lưu đánh bài!');
+  auditEvent('save_card', `${fmt(amount)} — ${payer} trả — ${breakdown.map(b=>b.person+':'+Math.round(b.pct*100)+'%').join(', ')}`);
   resetCard();
   renderLog();
   updateStats();
@@ -1411,6 +1676,7 @@ async function settleDebt() {
   document.getElementById('settle-purpose').value = '';
 
   showToast(`${from} đã trả ${to} ${fmt(amount)}`);
+  auditEvent('settle', `${from} → ${to}: ${fmt(amount)}${purpose ? ' (' + purpose + ')' : ''}`);
 
   calcDebts();
   updateStats();
@@ -1454,6 +1720,7 @@ async function deleteLog(id) {
   if (!confirm('Xóa giao dịch này?')) return;
 
   const tx = _db.transactions.find(t => t.id === id);
+  auditEvent('delete_tx', tx ? `${tx.type} — ${fmt(tx.amount)} — ${tx.details || ''}` : `id:${id}`);
 
   // settlement cũ + mới
   if (tx && tx.type === 'settle') {
@@ -1586,7 +1853,8 @@ async function scoreAdd(id, input) {
   const p = scorePlayers.find(x => x.id === id);
   if (!p) return;
   p.score += val;
-  scoreHistory.push({ id, value: val, date: Date.now() });
+  scoreHistory.push({ type: 'add', entryId: crypto.randomUUID(), id, value: val, date: Date.now() });
+  auditEvent('score_add', `+${val} cho ${p.name}`);
   input.value = '';
   await saveScoreData();
   renderScore();
@@ -1617,12 +1885,12 @@ async function scoreAddPlayer() {
 }
 
 function scoreToggleDelete() {
+  if (!scoreDeleteMode) {
+    if (!requirePassword()) return;
+  }
   scoreDeleteMode = !scoreDeleteMode;
-
   const btn = document.getElementById('score-delete-btn');
-
   btn.style.opacity = scoreDeleteMode ? '1' : '0.6';
-
   renderScore();
   renderRandomList();
 }
@@ -1637,59 +1905,98 @@ async function scoreDeletePlayer(id) {
   renderRandomList();
 }
 
+function requirePassword() {
+  const pw = prompt('Nhap mat khau:');
+  if (pw !== '1') { showToast('Sai mat khau!', true); return false; }
+  return true;
+}
+
 async function scoreUndo() {
-  if (scoreHistory.length === 0) return;
-  const last = scoreHistory.pop();
-  const p = scorePlayers.find(x => x.id === last.id);
-  if (p) p.score -= last.value;
+  // Find last "add" entry that has not been undone yet
+  const undoneTargets = scoreHistory.filter(h => h.type === 'undo').map(h => h.target);
+  const lastAction = [...scoreHistory].reverse().find(h => h.type !== 'undo' && h.type !== 'delete' && !undoneTargets.includes(h.entryId));
+  if (!lastAction) { showToast('Khong co gi de undo', true); return; }
+  if (!requirePassword()) return;
+  const p = scorePlayers.find(x => x.id === lastAction.id);
+  if (p) p.score -= lastAction.value;
+  scoreHistory.push({ type: 'undo', target: lastAction.entryId, id: lastAction.id, value: lastAction.value, date: Date.now() });
+  auditEvent('score_undo', `Undo +${lastAction.value} cua ${p ? p.name : '?'}`);
   await saveScoreData();
   renderScore();
   renderRandomList();
 }
 
-async function scoreRemoveHistory(index) {
-  const item = scoreHistory[index];
-  const p = scorePlayers.find(x => x.id === item.id);
-  if (p) p.score -= item.value;
-  scoreHistory.splice(index, 1);
+async function scoreRemoveHistory(entryId) {
+  if (!requirePassword()) return;
+  const item = scoreHistory.find(h => h.entryId === entryId);
+  if (!item) return;
+  // Check if already undone
+  const alreadyUndone = scoreHistory.some(h => h.type === 'undo' && h.target === entryId);
+  if (!alreadyUndone) {
+    const p = scorePlayers.find(x => x.id === item.id);
+    if (p) p.score -= item.value;
+  }
+  scoreHistory.push({ type: 'delete', target: entryId, id: item.id, value: item.value, date: Date.now() });
+  auditEvent('score_delete', `Xoa log +${item.value} cua ${p ? p.name : '?'}`);
   await saveScoreData();
   renderScore();
   renderRandomList();
 }
 
 function renderScoreHistory() {
-
   const h = document.getElementById('score-history');
 
-  if (scoreHistory.length === 0) {
-    h.innerHTML = '<div class="empty">Chưa có lịch sử</div>';
+  // Filter out meta-entries for display, show only add entries + annotations
+  const addEntries = scoreHistory.filter(item => item.type === 'add' || (!item.type));
+  const deletedTargets = new Set(scoreHistory.filter(h => h.type === 'delete').map(h => h.target));
+  const undoneTargets = new Set(scoreHistory.filter(h => h.type === 'undo').map(h => h.target));
+
+  if (addEntries.length === 0) {
+    h.innerHTML = '<div class="empty">Chua co lich su</div>';
     return;
   }
 
-  h.innerHTML = scoreHistory.slice().reverse().map((item, i) => {
-
-    const realIndex = scoreHistory.length - 1 - i;
-
+  h.innerHTML = addEntries.slice().reverse().map((item) => {
     const p = scorePlayers.find(x => x.id === item.id);
+    const entryId = item.entryId || item.id + '_' + item.date;
+    const isDeleted = deletedTargets.has(item.entryId);
+    const isUndone = undoneTargets.has(item.entryId);
+
+    let statusBadge = '';
+    if (isDeleted) {
+      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--accent2);margin-left:6px;opacity:0.8;">DELETED</span>';
+    } else if (isUndone) {
+      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--muted);margin-left:6px;opacity:0.8;">UNDO</span>';
+    }
+
+    const nameStyle = (isDeleted || isUndone)
+      ? 'text-decoration:line-through;opacity:0.45;'
+      : '';
+
+    const deleteBtn = (!isDeleted && !isUndone)
+      ? `<button class="btn btn-danger" onclick="window.scoreRemoveHistory('${item.entryId}')">X</button>`
+      : `<span style="width:44px;display:inline-block;"></span>`;
+
+    const date = item.date ? new Date(item.date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
 
     return `
-      <div class="score-history-item">
-        <div>
+      <div class="score-history-item" style="${isDeleted || isUndone ? 'opacity:0.55;' : ''}">
+        <div style="${nameStyle}">
           <strong>${p ? p.name : '?'}</strong>
-          +${item.value}
+          <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent3);">+${item.value}</span>
+          ${statusBadge}
+          ${date ? `<span style="font-size:0.68rem;color:var(--muted);margin-left:8px;">${date}</span>` : ''}
         </div>
-
-        <button class="btn btn-danger"
-          onclick="window.scoreRemoveHistory(${realIndex})">
-          X
-        </button>
+        ${deleteBtn}
       </div>
     `;
   }).join('');
 }
 
 async function scoreReset() {
-  if (!confirm('Reset toàn bộ điểm?')) return;
+  if (!requirePassword()) return;
+  if (!confirm('Reset toan bo diem va lich su?')) return;
+  auditEvent('score_reset', 'Reset toan bo diem va lich su');
   scorePlayers = [];
   scoreHistory = [];
   await saveScoreData();
@@ -1755,57 +2062,12 @@ function updateRandomName(index, value) {
 }
 
 function calculateWeights() {
-
   const weights = {};
-
   if (randomPlayers.length === 0) return weights;
 
-  randomPlayers.forEach(p => weights[p] = 0);
-
-  const tuName = randomPlayers.find(p =>
-    p.trim().toLowerCase() === 'tú'
-  );
-
-  const balances = getBalances();
-
-  let maxDebtor = null;
-  let maxDebt = 0;
-
-  Object.entries(balances).forEach(([name, value]) => {
-    if (value < maxDebt) {
-      maxDebt = value;
-      maxDebtor = name;
-    }
-  });
-
-  if (tuName) {
-    weights[tuName] = 30;
-  }
-
-  if (maxDebtor && randomPlayers.includes(maxDebtor)) {
-
-    if (maxDebtor === tuName) {
-      weights[maxDebtor] = 30;
-    } else {
-      weights[maxDebtor] = 25;
-    }
-  }
-
-  const assigned = Object.values(weights)
-    .reduce((a,b)=>a+b,0);
-
-  const remainPlayers = randomPlayers.filter(p =>
-    weights[p] === 0
-  );
-
-  const remain = Math.max(0, 100 - assigned);
-
-  const each = remainPlayers.length > 0
-    ? remain / remainPlayers.length
-    : 0;
-
-  remainPlayers.forEach(p => {
-    weights[p] = each;
+  const equalChance = 100 / randomPlayers.length;
+  randomPlayers.forEach(p => {
+    weights[p] = equalChance;
   });
 
   return weights;
@@ -1940,39 +2202,27 @@ function weightedPick(weights) {
 }
 
 function spinWheel() {
-
   if (randomPlayers.length === 0) return;
 
   const weights = calculateWeights();
-
   const winner = weightedPick(weights);
-
   const canvas = document.getElementById('wheel');
 
   const winnerIndex = randomPlayers.indexOf(winner);
-
   const slice = 360 / randomPlayers.length;
 
-  // center angle của slice winner
-  const midAngle = -90 + (winnerIndex * slice) + (slice / 2);
+  const randomOffset = (Math.random() * 0.8 + 0.1) * slice;
+  const neededRotation = 360 - (winnerIndex * slice) - randomOffset;
 
-  // đưa midAngle về top pointer (0deg)
-  const neededRotation = 90 - (winnerIndex * slice) - (slice / 2);
+  const baseRotation = Math.floor(currentRotation / 360) * 360;
+  const extraSpin = 360 * 5;
 
-  const extraSpin = 360 * 6;
-
-  currentRotation += extraSpin + neededRotation;
-
+  currentRotation = baseRotation + extraSpin + neededRotation;
   canvas.style.transform = `rotate(${currentRotation}deg)`;
 
   setTimeout(() => {
-
-    document.getElementById('random-result').innerHTML = `
-      🎉 ${winner}
-    `;
-
+    document.getElementById('random-result').innerHTML = `🎉 ${winner}`;
     showToast(`Random ra: ${winner}`);
-
   }, 5200);
 }
 
@@ -1999,7 +2249,8 @@ Object.assign(window, {
   resetCard, calcDebts, settleDebt, renderLog, deleteLog, clearLog, updateStats,
   scoreAdd, scoreRename, scoreEdit, scoreAddPlayer, scoreToggleDelete,
   scoreDeletePlayer, scoreUndo, scoreRemoveHistory, scoreReset, populateSelect,
-  addRandomPerson, removeRandomPerson, updateRandomName, spinWheel
+  addRandomPerson, removeRandomPerson, updateRandomName, spinWheel,
+  selectLoginUser, doLogin, doLogout, renderAudit
 });
 </script>
 </body>
