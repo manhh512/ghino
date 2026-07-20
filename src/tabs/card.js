@@ -1,4 +1,4 @@
-import { PEOPLE, fmt, showToast } from "../utils/helpers";
+import { PEOPLE, fmt, showToast, ACCOUNT_LABELS } from "../utils/helpers";
 import { state, saveDB } from "../utils/state";
 import { auditEvent } from "../auth/audit";
 
@@ -148,6 +148,7 @@ export async function saveCard() {
     return;
   }
 
+  const createdBy = ACCOUNT_LABELS[state.currentUser] || state.currentUser || 'Hệ thống';
   state.db.transactions.push({
     id: Date.now(),
     type: 'card',
@@ -156,7 +157,7 @@ export async function saveCard() {
     payer,
     mode: state.cardMode,
     breakdown,
-    details: breakdown.map(b => `${b.person}:${Math.round(b.pct * 100)}%`).join(', ')
+    details: `${breakdown.map(b => `${b.person}:${Math.round(b.pct * 100)}%`).join(', ')} (Nhập bởi: ${createdBy})`
   });
 
   showToast('Đã lưu đánh bài!');

@@ -138,18 +138,18 @@ export async function deleteLog(id) {
 
   await saveDB(state.db);
 }
-
 export async function clearLog() {
   if (!confirm('Xóa TOÀN BỘ lịch sử? Không thể hoàn tác!')) return;
   state.db = { transactions: [], settlements: [] };
-  
+
+  auditEvent('clear_logs', 'Xóa toàn bộ lịch sử giao dịch và thanh toán');
+
   renderLog();
   calcDebts();
   updateStats();
-  
+
   await saveDB(state.db);
 }
-
 export function populateLogFilterPayer() {
   const el = document.getElementById('log-filter-payer');
   if (el) {

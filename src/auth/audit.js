@@ -25,8 +25,8 @@ export async function saveAuditEntry(entry) {
 
 export function auditEvent(type, detail = '') {
   if (!state.currentUser) return;
-  // Bỏ qua các hành động ghi điểm
-  if (['score_add', 'score_undo', 'score_delete', 'score_reset'].includes(type)) return;
+  // Bỏ qua các hành động ghi điểm cá nhân, giữ lại hành động reset điểm số
+  if (['score_add', 'score_undo', 'score_delete'].includes(type)) return;
   const entry = {
     id: crypto.randomUUID(),
     user: state.currentUser,
@@ -49,6 +49,8 @@ const AUDIT_TYPE_LABELS = {
   save_card: { icon: '🃏', label: 'Lưu đánh bài', color: '#e89a4a' },
   settle: { icon: '✅', label: 'Thanh toán nợ', color: '#4a9ae8' },
   delete_tx: { icon: '🗑', label: 'Xóa giao dịch', color: '#e84a4a' },
+  score_reset: { icon: '🎲', label: 'Reset điểm số', color: '#e84a4a' },
+  clear_logs: { icon: '🗑', label: 'Xóa sạch lịch sử', color: '#e84a4a' },
 };
 
 export function renderAudit() {
