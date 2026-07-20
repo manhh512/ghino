@@ -35,8 +35,8 @@ function switchTab(tab, el) {
   }
 }
 
-// Initialize application on window load
-window.addEventListener('load', async () => {
+// Initialize application
+async function initApp() {
   // 1. Date display
   const now = new Date();
   const dateDisplay = document.getElementById('date-display');
@@ -120,7 +120,14 @@ window.addEventListener('load', async () => {
 
   // 7. Bind Event Listeners
   setupEventListeners();
-});
+}
+
+// Chạy khởi tạo ứng dụng ngay lập tức hoặc khi DOM sẵn sàng
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Helper for binding DOM event listeners cleanly
 function setupEventListeners() {
