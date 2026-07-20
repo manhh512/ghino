@@ -1,648 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ghi Nợ</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222;
-    --border: #2e2e2e;
-    --accent: #e8c84a;
-    --accent2: #e84a4a;
-    --accent3: #4ae8a0;
-    --text: #f0ede6;
-    --muted: #888;
-    --card-bg: #161616;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* HEADER */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px;
-    border-bottom: 1px solid var(--border);
-    background: #111;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 3px;
-    color: var(--accent);
-  }
-
-  .logo span { color: var(--accent2); }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--surface);
-    padding: 6px 28px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-  }
-
-  .tab-btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: none;
-    border: 1px solid transparent;
-    padding: 8px 18px;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .tab-btn:hover { color: var(--text); border-color: var(--border); }
-  .tab-btn.active {
-    color: var(--bg);
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  /* MAIN */
-  main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: 24px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-title .icon { font-size: 1.2rem; }
-
-  /* CARD */
-  .card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-
-  .card-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-
-  /* FORM ELEMENTS */
-  label {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 5px;
-    font-family: 'IBM Plex Mono', monospace;
-    letter-spacing: 0.5px;
-  }
-
-  input[type="number"], input[type="text"], select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.95rem;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  input:focus, select:focus { border-color: var(--accent); }
-
-  select option { background: var(--surface2); }
-
-  /* PERSON SELECTOR */
-  .person-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .person-chip {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 7px 16px;
-    border-radius: 4px;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.12s;
-    user-select: none;
-  }
-
-  .person-chip.selected {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #111;
-  }
-
-  .person-chip.p50 { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-  .person-chip.p30 { background: #e89a4a; border-color: #e89a4a; color: #fff; }
-  .person-chip.p20 { background: #9a4ae8; border-color: #9a4ae8; color: #fff; }
-  .person-chip.p40 { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-  .person-chip.p10 { background: #4a9ae8; border-color: #4a9ae8; color: #fff; }
-
-  /* BTN */
-  .btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 12px 28px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #111;
-  }
-
-  .btn-primary:hover { background: #f0d060; transform: translateY(-1px); }
-
-  .btn-danger {
-    background: var(--accent2);
-    color: #fff;
-    padding: 6px 14px;
-    font-size: 0.72rem;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-
-  .btn-success {
-    background: var(--accent3);
-    color: #111;
-  }
-
-  /* GRID */
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  @media(max-width: 600px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
-
-  .mt { margin-top: 16px; }
-  .mt2 { margin-top: 8px; }
-
-  /* LOG TABLE */
-  .log-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-
-  .log-table th {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: left;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .log-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #1e1e1e;
-    vertical-align: top;
-  }
-
-  .log-table tr:hover td { background: #1c1c1c; }
-
-  .tag {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    padding: 2px 7px;
-    border-radius: 3px;
-    font-weight: 600;
-    margin: 2px;
-  }
-
-  .tag-food { background: #1e3a1e; color: var(--accent3); }
-  .tag-card { background: #3a1e1e; color: var(--accent2); }
-  .tag-settle { background: #1e2e3a; color: #4a9ae8; }
-
-  /* DEBT RESULT */
-  .debt-result {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-
-  .debt-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-
-  .debt-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.88rem;
-  }
-
-  .debt-row:last-child { border-bottom: none; }
-
-  .amount-pos { color: var(--accent2); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
-  .amount-neg { color: var(--accent3); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
-  .amount-zero { color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
-
-  /* MODE SELECTOR */
-  .mode-selector {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .mode-btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding: 9px 20px;
-    border-radius: 4px;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.12s;
-  }
-
-  .mode-btn.active { border-color: var(--accent2); color: var(--accent2); background: #2a1a1a; }
-
-  /* SLOT SECTION */
-  .slot-section {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
-    margin-bottom: 10px;
-  }
-
-  .slot-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-
-  /* SUMMARY BOX */
-  .summary-box {
-    background: #0d1a0d;
-    border: 1px solid #1e3a1e;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 16px;
-  }
-
-  .summary-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    color: var(--accent3);
-    margin-bottom: 12px;
-  }
-
-  .transfer-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #1e3a1e;
-    font-size: 0.88rem;
-  }
-
-  .transfer-row:last-child { border-bottom: none; }
-
-  .arrow { color: var(--accent2); font-size: 1.1rem; }
-
-  /* SETTLE BTN */
-  .settle-form {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  }
-
-  .settle-form > div { flex: 1; min-width: 130px; }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: var(--accent3);
-    color: #111;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding: 12px 22px;
-    border-radius: 4px;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.25s;
-    z-index: 999;
-  }
-
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  /* STATS BAR */
-  .stats-bar {
-    display: flex;
-    gap: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-
-  .stat-item {
-    flex: 1;
-    text-align: center;
-    padding: 14px 8px;
-    border-right: 1px solid var(--border);
-  }
-
-  .stat-item:last-child { border-right: none; }
-
-  .stat-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 1px;
-    color: var(--accent);
-  }
-
-  .stat-lbl {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* Empty state */
-  .empty {
-    text-align: center;
-    color: var(--muted);
-    padding: 40px 0;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.82rem;
-    letter-spacing: 1px;
-  }
-
-  /* Divider */
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-  .flex-end { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-  .flex-between { display: flex; justify-content: space-between; align-items: center; }
-
-  input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
-
-  /* PURPOSE SELECTOR */
-  .purpose-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .purpose-chip {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-    padding: 7px 14px;
-    border-radius: 4px;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.12s;
-    user-select: none;
-  }
-
-  .purpose-chip:hover { border-color: var(--accent); color: var(--text); }
-
-  .purpose-chip.selected {
-    background: #1e2e0d;
-    border-color: var(--accent3);
-    color: var(--accent3);
-  }
-
-  .purpose-custom-wrap {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    align-items: center;
-  }
-
-  .purpose-custom-wrap input {
-    flex: 1;
-  }
-
-  .pct-badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 3px;
-    margin-left: 6px;
-  }
-
-  .badge-50 { background: var(--accent2); color: #fff; }
-  .badge-30 { background: #e89a4a; color: #fff; }
-  .badge-20 { background: #9a4ae8; color: #fff; }
-  .badge-40 { background: var(--accent2); color: #fff; }
-  .badge-10 { background: #4a9ae8; color: #fff; }
-
-  .score-player {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface2);
-  margin-bottom: 12px;
-  padding: 10px;
-  border-radius: 10px;
-  gap: 10px;
-  border: 1px solid var(--border);
-}
-
-.score-player input {
-  border: none;
-  border-radius: 6px;
-  background: #0f0f0f;
-  color: white;
-  padding: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-}
-
-.score-add {
-  width: 70px !important;
-  flex: none !important;
-  text-align: center;
-}
-
-.score-name {
-  flex: 1 !important;
-  width: 100% !important;
-  min-width: 0;
-  text-align: center;
-}
-
-.score-total {
-  width: 80px !important;
-  flex: none !important;
-  text-align: center;
-}
-
-.score-history-item {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid var(--border);
-}
-
-/* ================= RANDOM WHEEL ================= */
-.random-wrap {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:20px;
-}
-
-.wheel-container {
-  position:relative;
-  width:360px;
-  height:360px;
-}
-
-#wheel {
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  border:8px solid var(--accent);
-  background:#111;
-  transition:transform 5s cubic-bezier(0.12, 0.8, 0.2, 1);
-  box-shadow:0 0 30px rgba(0,0,0,0.5);
-}
-
-.wheel-pointer {
-  position:absolute;
-  top:-12px;
-  left:50%;
-  transform:translateX(-50%);
-  width:0;
-  height:0;
-  border-left:18px solid transparent;
-  border-right:18px solid transparent;
-  border-top:40px solid var(--accent2);
-  z-index:10;
-}
-
-.random-list {
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.random-row {
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.random-row input {
-  flex:1;
-}
-
-.random-percent {
-  width:60px;
-  text-align:center;
-  font-family:'IBM Plex Mono', monospace;
-  color:var(--accent3);
-  font-size:1.2rem;
-}
-
-.random-result {
-  font-family:'Bebas Neue', sans-serif;
-  font-size:2rem;
-  letter-spacing:2px;
-  color:var(--accent);
-  text-align:center;
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghi Nợ</title>
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <link rel="stylesheet" href="/src/styles/components.css">
 </head>
 <body>
 
@@ -665,11 +28,11 @@
     <div style="margin-bottom:20px;">
       <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#666;margin-bottom:8px;">TÀI KHOẢN</label>
       <div style="display:flex;flex-wrap:wrap;gap:8px;" id="login-user-chips">
-        <div class="login-chip" onclick="selectLoginUser('manh')" data-user="manh">Mạnh</div>
-        <div class="login-chip" onclick="selectLoginUser('hung')" data-user="hung">Hùng</div>
-        <div class="login-chip" onclick="selectLoginUser('tu')" data-user="tu">Tú</div>
-        <div class="login-chip" onclick="selectLoginUser('duy')" data-user="duy">Duy</div>
-        <div class="login-chip" onclick="selectLoginUser('tram')" data-user="tram">Trâm</div>
+        <div class="login-chip" data-user="manh">Mạnh</div>
+        <div class="login-chip" data-user="hung">Hùng</div>
+        <div class="login-chip" data-user="tu">Tú</div>
+        <div class="login-chip" data-user="duy">Duy</div>
+        <div class="login-chip" data-user="tram">Trâm</div>
       </div>
     </div>
 
@@ -680,14 +43,13 @@
                font-family:'IBM Plex Mono',monospace;font-size:1rem;padding:12px 14px;outline:none;
                transition:border-color 0.15s;"
         onfocus="this.style.borderColor='#e8c84a'" onblur="this.style.borderColor='#2e2e2e'"
-        onkeydown="if(event.key==='Enter') doLogin()"
       >
     </div>
 
     <div id="login-error" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
       color:#e84a4a;margin-bottom:14px;letter-spacing:0.5px;"></div>
 
-    <button onclick="doLogin()" style="
+    <button id="login-submit-btn" style="
       width:100%;background:#e8c84a;color:#111;border:none;border-radius:6px;
       font-family:'IBM Plex Mono',monospace;font-size:0.85rem;font-weight:700;
       letter-spacing:2px;text-transform:uppercase;padding:14px;cursor:pointer;
@@ -702,17 +64,6 @@
   </div>
 </div>
 
-<style>
-.login-chip {
-  font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:600;
-  padding:8px 16px;border-radius:4px;border:1.5px solid #2e2e2e;
-  background:#222;color:#666;cursor:pointer;transition:all 0.12s;user-select:none;
-  letter-spacing:0.5px;
-}
-.login-chip:hover { border-color:#e8c84a;color:#e8c84a; }
-.login-chip.active { background:#1e2a0a;border-color:#4ae8a0;color:#4ae8a0; }
-</style>
-
 <header>
   <div class="logo">GHI <span>NỢ</span></div>
   <div style="display:flex;align-items:center;gap:16px;">
@@ -724,12 +75,12 @@
         color:#4ae8a0;letter-spacing:1px;">
         👤 <span id="current-user-name"></span>
       </div>
-      <button onclick="changePassword()" title="Đổi mật khẩu" style="
+      <button id="change-password-btn" title="Đổi mật khẩu" style="
         background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;
         color:#888;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace;
         transition:all 0.15s;" onmouseover="this.style.borderColor='#9a4ae8';this.style.color='#9a4ae8'"
         onmouseout="this.style.borderColor='#444';this.style.color='#888'">🔒</button>
-      <button onclick="doLogout()" title="Đăng xuất" style="
+      <button id="logout-btn" title="Đăng xuất" style="
         background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;
         color:#888;cursor:pointer;font-size:0.75rem;font-family:'IBM Plex Mono',monospace;
         transition:all 0.15s;" onmouseover="this.style.borderColor='#e84a4a';this.style.color='#e84a4a'"
@@ -738,14 +89,15 @@
   </div>
 </header>
 
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('home')">🏠 Tổng Quan</button>
-  <button class="tab-btn" onclick="switchTab('food')">💵 Chia Tiền</button>
-  <button class="tab-btn" onclick="switchTab('card')">🃏 Đánh Bài</button>
-  <button class="tab-btn" onclick="switchTab('score', this)">🎲 Điểm</button>
-  <button class="tab-btn" onclick="switchTab('random', this)">🎡 Random</button>
-  <button class="tab-btn" onclick="switchTab('log')">📋 Lịch Sử</button>
-  <button class="tab-btn" onclick="switchTab('audit')">🔐 Audit</button>
+<div class="tabs" id="app-tabs">
+  <button class="tab-btn active" data-tab="home">🏠 Tổng Quan</button>
+  <button class="tab-btn" data-tab="food">💵 Chia Tiền</button>
+  <button class="tab-btn" data-tab="card">🃏 Đánh Bài</button>
+  <button class="tab-btn" data-tab="score">🎲 Điểm</button>
+  <button class="tab-btn" data-tab="random">🎡 Random</button>
+  <button class="tab-btn" data-tab="log">📋 Lịch Sử</button>
+  <button class="tab-btn" data-tab="qr">💳 Tài Khoản</button>
+  <button class="tab-btn" data-tab="audit">🔐 Audit</button>
 </div>
 
 <main>
@@ -764,7 +116,7 @@
     <div class="card">
       <div class="flex-between" style="margin-bottom:14px;">
         <div class="card-label">KẾT QUẢ NỢ</div>
-        <button class="btn btn-primary" onclick="calcDebts()">⚡ TÍNH TOÁN</button>
+        <button class="btn btn-primary" id="calc-debts-btn">⚡ TÍNH TOÁN</button>
       </div>
       <div id="debt-results"><div class="empty">Nhấn TÍNH TOÁN để xem kết quả</div></div>
     </div>
@@ -788,7 +140,11 @@
           <label>Mục đích</label>
           <input type="text" id="settle-purpose" placeholder="Ví dụ: trả tiền ăn, bài, cafe...">
         </div>
-        <button class="btn btn-success" style="margin-bottom:0;padding:10px 18px;" onclick="settleDebt()">✔ GHI</button>
+        <div>
+          <label>Đính kèm Bill</label>
+          <input type="file" id="settle-bill" accept="image/*" style="padding: 7px 10px; font-size: 0.85rem;" />
+        </div>
+        <button class="btn btn-success" style="margin-bottom:0;padding:10px 18px;" id="settle-btn">✔ GHI</button>
       </div>
     </div>
 
@@ -807,7 +163,7 @@
     <div class="card">
       <div class="card-label">MỤC ĐÍCH</div>
       <div class="purpose-custom-wrap">
-        <input type="text" id="food-purpose-custom" placeholder="Nhập mục đích..." oninput="onCustomPurposeInput()">
+        <input type="text" id="food-purpose-custom" placeholder="Nhập mục đích...">
       </div>
     </div>
 
@@ -815,7 +171,7 @@
       <div class="grid2">
         <div>
           <label>Tổng tiền (đ)</label>
-          <input type="number" id="food-amount" placeholder="0" oninput="calcFoodPreview()">
+          <input type="number" id="food-amount" placeholder="0">
         </div>
         <div>
           <label>Người trả</label>
@@ -831,8 +187,8 @@
       </div>
 
       <div class="flex-end">
-        <button class="btn btn-ghost" onclick="resetFood()">RESET</button>
-        <button class="btn btn-primary" onclick="saveFood()">💾 LƯU</button>
+        <button class="btn btn-ghost" id="food-reset-btn">RESET</button>
+        <button class="btn btn-primary" id="food-save-btn">💾 LƯU</button>
       </div>
     </div>
   </div>
@@ -844,15 +200,15 @@
     <div class="card">
       <div class="card-label">CHỌN MODE</div>
       <div class="mode-selector">
-        <button class="mode-btn active" id="mode-532" onclick="setCardMode('532')">5-3-2</button>
-        <button class="mode-btn" id="mode-4321" onclick="setCardMode('4321')">4-3-2-1</button>
+        <button class="mode-btn active" id="mode-532">5-3-2</button>
+        <button class="mode-btn" id="mode-4321">4-3-2-1</button>
       </div>
 
       <div class="card-label">TỔNG TIỀN</div>
       <div class="grid2" style="margin-bottom:16px;">
         <div>
           <label>Tổng tiền (đ)</label>
-          <input type="number" id="card-amount" placeholder="0" oninput="calcCardPreview()">
+          <input type="number" id="card-amount" placeholder="0">
         </div>
         <div>
           <label>Người đã trả</label>
@@ -904,98 +260,111 @@
       </div>
 
       <div class="flex-end">
-        <button class="btn btn-ghost" onclick="resetCard()">RESET</button>
-        <button class="btn btn-primary" onclick="saveCard()">💾 LƯU</button>
+        <button class="btn btn-ghost" id="card-reset-btn">RESET</button>
+        <button class="btn btn-primary" id="card-save-btn">💾 LƯU</button>
       </div>
     </div>
   </div>
+
   <!-- ========== SCORE ========== -->
-<div class="tab-panel" id="tab-score">
-
-  <div class="section-title">
-    <span class="icon">🎲</span> Ghi Điểm
-  </div>
-
-  <div class="card">
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="btn btn-primary" onclick="scoreAddPlayer()">ADD</button>
-      <button class="btn btn-danger"
-        onclick="scoreToggleDelete()"
-        id="score-delete-btn"
-        style="opacity:0.6">
-        DELETE
-      </button>
-      <button class="btn btn-danger" onclick="scoreReset()">RESET</button>
-    </div>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;">
-      🔒 DELETE người · RESET yêu cầu mật khẩu · Bấm X trong lịch sử để undo
+  <div class="tab-panel" id="tab-score">
+    <div class="section-title">
+      <span class="icon">🎲</span> Ghi Điểm
     </div>
 
-    <div id="score-players"></div>
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-primary" id="score-add-player-btn">ADD</button>
+        <button class="btn btn-danger" id="score-delete-btn" style="opacity:0.6">DELETE</button>
+        <button class="btn btn-danger" id="score-reset-btn">RESET</button>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;">
+        🔒 DELETE người · RESET yêu cầu mật khẩu · Bấm Undo trong lịch sử để hoàn tác
+      </div>
 
+      <div id="score-players"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">LỊCH SỬ ĐIỂM</div>
+      <div id="score-history"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="card-label">LỊCH SỬ ĐIỂM</div>
-    <div id="score-history"></div>
-  </div>
-
-</div>
-
-  
   <!-- ========== RANDOM ========== -->
-<div class="tab-panel" id="tab-random">
-
-  <div class="section-title">
-    <span class="icon">🎡</span> Random Wheel
-  </div>
-
-  <div class="card">
-
-    <div class="random-wrap">
-
-      <div class="wheel-container">
-        <div class="wheel-pointer"></div>
-        <canvas id="wheel" width="360" height="360"></canvas>
-      </div>
-
-      <button class="btn btn-primary" onclick="spinWheel()">
-        🎲 QUAY
-      </button>
-
-      <div class="random-result" id="random-result">
-        READY
-      </div>
-
+  <div class="tab-panel" id="tab-random">
+    <div class="section-title">
+      <span class="icon">🎡</span> Random Wheel
     </div>
 
-  </div>
+    <div class="card">
+      <div class="random-wrap">
+        <div class="wheel-container">
+          <div class="wheel-pointer"></div>
+          <canvas id="wheel" width="360" height="360"></canvas>
+        </div>
 
-  <div class="card">
+        <button class="btn btn-primary" id="spin-wheel-btn">🎲 QUAY</button>
 
-    <div class="card-label">NGƯỜI THAM GIA</div>
-
-    <div id="random-list" class="random-list"></div>
-
-    <div class="flex-end">
-      <button class="btn btn-ghost" onclick="addRandomPerson()">
-        + ADD
-      </button>
+        <div class="random-result" id="random-result">READY</div>
+      </div>
     </div>
 
+    <div class="card">
+      <div class="card-label">NGƯỜI THAM GIA</div>
+      <div id="random-list" class="random-list"></div>
+      <div class="flex-end">
+        <button class="btn btn-ghost" id="add-random-person-btn">+ ADD</button>
+      </div>
+    </div>
   </div>
-
-</div>
-
 
   <!-- ========== LOG ========== -->
   <div class="tab-panel" id="tab-log">
     <div class="section-title"><span class="icon">📋</span> Lịch Sử</div>
+
+    <!-- BỘ LỌC GIAO DỊCH NÂNG CAO (NEW FEATURE) -->
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-label">BỘ LỌC NÂNG CAO</div>
+      <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:8px;">
+        <div>
+          <label>Từ khóa chi tiết</label>
+          <input type="text" id="log-filter-keyword" placeholder="Nhập từ khóa tìm kiếm...">
+        </div>
+        <div>
+          <label>Loại giao dịch</label>
+          <select id="log-filter-type">
+            <option value="">Tất cả loại</option>
+            <option value="food">💵 Chia tiền</option>
+            <option value="card">🃏 Bài</option>
+            <option value="settle">💸 Trả nợ</option>
+          </select>
+        </div>
+        <div>
+          <label>Người trả</label>
+          <select id="log-filter-payer">
+            <option value="">Tất cả người trả</option>
+          </select>
+        </div>
+        <div>
+          <label>Từ ngày</label>
+          <input type="date" id="log-filter-start-date">
+        </div>
+        <div>
+          <label>Đến ngày</label>
+          <input type="date" id="log-filter-end-date">
+        </div>
+      </div>
+      <div class="flex-end" style="margin-top: 12px;">
+        <button class="btn btn-ghost" id="log-filter-reset-btn">XÓA BỘ LỌC</button>
+      </div>
+    </div>
+
     <div class="flex-between" style="margin-bottom:16px;">
       <div style="font-size:0.82rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;" id="log-count">0 bản ghi</div>
-      <button class="btn btn-danger" onclick="clearLog()">🗑 XÓA TẤT CẢ</button>
+      <button class="btn btn-danger" id="clear-all-logs-btn">🗑 XÓA TẤT CẢ</button>
     </div>
+
     <div id="log-table-wrap">
       <div class="empty">Chưa có giao dịch nào</div>
     </div>
@@ -1008,8 +377,7 @@
     <div class="card" style="margin-bottom:20px;">
       <div class="card-label">BỘ LỌC</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-        <select id="audit-filter-user" onchange="renderAudit()"
-          style="flex:1;min-width:120px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;padding:8px 10px;outline:none;">
+        <select id="audit-filter-user" style="flex:1;min-width:120px;">
           <option value="">Tất cả user</option>
           <option value="manh">Mạnh</option>
           <option value="hung">Hùng</option>
@@ -1017,8 +385,7 @@
           <option value="duy">Duy</option>
           <option value="tram">Trâm</option>
         </select>
-        <select id="audit-filter-type" onchange="renderAudit()"
-          style="flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;padding:8px 10px;outline:none;">
+        <select id="audit-filter-type" style="flex:1;min-width:140px;">
           <option value="">Tất cả loại</option>
           <option value="login">Đăng nhập</option>
           <option value="login_fail">Đăng nhập thất bại</option>
@@ -1038,1244 +405,44 @@
     </div>
   </div>
 
+  <!-- ========== QR BANK ACCOUNT ========== -->
+  <div class="tab-panel" id="tab-qr">
+    <div class="section-title"><span class="icon">💳</span> Tài Khoản Ngân Hàng</div>
+    <div id="qr-manager-list" class="grid2"></div>
+  </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-
-// ===================== FIREBASE CONFIG =====================
-const firebaseConfig = {
-  apiKey: "AIzaSyCERd9rAdFL4j55BG_6q1sFebMBPlQV0Kk",
-  authDomain: "ghino-86139.firebaseapp.com",
-  projectId: "ghino-86139",
-  storageBucket: "ghino-86139.firebasestorage.app",
-  messagingSenderId: "251610009825",
-  appId: "1:251610009825:web:584a352bd985e5b5e3e7a0",
-  measurementId: "G-MGGWZS4FDM"
-};
-
-const app = initializeApp(firebaseConfig);
-const db_firebase = getFirestore(app);
-const DB_DOC = doc(db_firebase, 'ghino', 'main');
-const SCORE_DOC = doc(db_firebase, 'ghino', 'score');
-const AUDIT_DOC = doc(db_firebase, 'ghino', 'audit');
-const PASSWD_DOC = doc(db_firebase, 'ghino', 'passwords');
-
-// Local cache
-let _db = { transactions: [], settlements: [] };
-let _dbReady = false;
-
-function showStatus(msg, ok = true) {
-  const s = document.getElementById('sync-status');
-  s.textContent = msg;
-  s.style.color = ok ? 'var(--accent3)' : 'var(--accent2)';
-}
-
-async function getDB() { return _db; }
-
-async function saveDB(data) {
-  _db = data;
-  try {
-    await setDoc(DB_DOC, data);
-    showStatus('✔ Đã lưu');
-  } catch(e) {
-    showStatus('✘ Lỗi lưu: ' + e.message, false);
-  }
-}
-
-// ===================== DATA =====================
-const PEOPLE = ['Mạnh','Hùng','Tú','Duy','Trâm'];
-
-// ===================== AUTH =====================
-let ACCOUNTS = { manh:'123', hung:'123', tu:'123', duy:'123', tram:'123' };
-const ACCOUNT_LABELS = { manh:'Mạnh', hung:'Hùng', tu:'Tú', duy:'Duy', tram:'Trâm' };
-let currentUser = null;
-let auditLog = [];
-
-async function loadPasswords() {
-  try {
-    const snap = await getDoc(PASSWD_DOC);
-    if (snap.exists()) Object.assign(ACCOUNTS, snap.data());
-  } catch(e) {}
-}
-
-async function savePasswords() {
-  try { await setDoc(PASSWD_DOC, ACCOUNTS); } catch(e) {}
-}
-
-async function changePassword() {
-  if (!currentUser) return;
-  const oldPw = prompt('Mật khẩu hiện tại:');
-  if (oldPw === null) return;
-  if (ACCOUNTS[currentUser] !== oldPw) { showToast('Sai mật khẩu hiện tại!', true); return; }
-  const newPw = prompt('Mật khẩu mới (tối thiểu 2 ký tự):');
-  if (!newPw || newPw.length < 2) { showToast('Mật khẩu quá ngắn!', true); return; }
-  const confirmPw = prompt('Nhập lại mật khẩu mới:');
-  if (newPw !== confirmPw) { showToast('Mật khẩu không khớp!', true); return; }
-  ACCOUNTS[currentUser] = newPw;
-  await savePasswords();
-  auditEvent('change_password', `${ACCOUNT_LABELS[currentUser]} doi mat khau`);
-  showToast('Đổi mật khẩu thành công!');
-}
-
-let _selectedLoginUser = '';
-function selectLoginUser(u) {
-  _selectedLoginUser = u;
-  document.querySelectorAll('.login-chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.user === u);
-  });
-}
-
-async function loadAudit() {
-  try {
-    const snap = await getDoc(AUDIT_DOC);
-    if (snap.exists()) auditLog = snap.data().log || [];
-  } catch(e) { auditLog = []; }
-}
-
-async function saveAuditEntry(entry) {
-  auditLog.push(entry);
-  try { await setDoc(AUDIT_DOC, { log: auditLog }); } catch(e) {}
-}
-
-function auditEvent(type, detail = '') {
-  if (!currentUser) return;
-  // Skip score-related events
-  if (['score_add','score_undo','score_delete','score_reset'].includes(type)) return;
-  const entry = {
-    id: crypto.randomUUID(),
-    user: currentUser,
-    userLabel: ACCOUNT_LABELS[currentUser],
-    type,
-    detail,
-    ts: Date.now(),
-    date: new Date().toISOString()
-  };
-  saveAuditEntry(entry);
-  return entry;
-}
-
-async function doLogin() {
-  const u = _selectedLoginUser;
-  const pw = document.getElementById('login-password').value;
-  const errEl = document.getElementById('login-error');
-
-  if (!u) { errEl.textContent = 'Vui lòng chọn tài khoản!'; errEl.style.display='block'; return; }
-  if (!pw) { errEl.textContent = 'Vui lòng nhập mật khẩu!'; errEl.style.display='block'; return; }
-  if (ACCOUNTS[u] !== pw) {
-    errEl.textContent = 'Sai mật khẩu!'; errEl.style.display='block';
-    document.getElementById('login-password').value = '';
-    // Log failed attempt
-    await saveAuditEntry({ id: crypto.randomUUID(), user: u, userLabel: ACCOUNT_LABELS[u], type:'login_fail', detail:'Sai mat khau', ts: Date.now(), date: new Date().toISOString() });
-    return;
-  }
-
-  currentUser = u;
-  sessionStorage.setItem('ghino_user', u);
-
-  // Show app, hide login
-  document.getElementById('login-overlay').style.display = 'none';
-  document.getElementById('current-user-badge').style.display = 'flex';
-  document.getElementById('current-user-name').textContent = ACCOUNT_LABELS[u].toUpperCase();
-
-  // Audit login
-  await saveAuditEntry({ id: crypto.randomUUID(), user: u, userLabel: ACCOUNT_LABELS[u], type:'login', detail:'Dang nhap thanh cong', ts: Date.now(), date: new Date().toISOString() });
-
-  showToast('Xin chào ' + ACCOUNT_LABELS[u] + '!');
-}
-
-async function doLogout() {
-  if (!confirm('Đăng xuất?')) return;
-  auditEvent('logout', 'Dang xuat');
-  await new Promise(r => setTimeout(r, 300));
-  currentUser = null;
-  sessionStorage.removeItem('ghino_user');
-  document.getElementById('login-overlay').style.display = 'flex';
-  document.getElementById('current-user-badge').style.display = 'none';
-  document.getElementById('login-password').value = '';
-  _selectedLoginUser = '';
-  document.querySelectorAll('.login-chip').forEach(c => c.classList.remove('active'));
-}
-
-const AUDIT_TYPE_LABELS = {
-  login: { icon:'🔑', label:'Đăng nhập', color:'#4ae8a0' },
-  login_fail: { icon:'❌', label:'Đăng nhập thất bại', color:'#e84a4a' },
-  logout: { icon:'🚪', label:'Đăng xuất', color:'#888' },
-  change_password: { icon:'🔒', label:'Đổi mật khẩu', color:'#9a4ae8' },
-  save_food: { icon:'💵', label:'Lưu chia tiền', color:'#e8c84a' },
-  save_card: { icon:'🃏', label:'Lưu đánh bài', color:'#e89a4a' },
-  settle: { icon:'✅', label:'Thanh toán nợ', color:'#4a9ae8' },
-  delete_tx: { icon:'🗑', label:'Xóa giao dịch', color:'#e84a4a' },
-};
-
-function renderAudit() {
-  const filterUser = document.getElementById('audit-filter-user').value;
-  const filterType = document.getElementById('audit-filter-type').value;
-
-  let entries = [...auditLog].reverse();
-  if (filterUser) entries = entries.filter(e => e.user === filterUser);
-  if (filterType) entries = entries.filter(e => e.type === filterType);
-
-  document.getElementById('audit-count').textContent = entries.length + ' sự kiện';
-
-  if (entries.length === 0) {
-    document.getElementById('audit-list').innerHTML = '<div class="empty">Không có dữ liệu</div>';
-    return;
-  }
-
-  document.getElementById('audit-list').innerHTML = entries.map(e => {
-    const meta = AUDIT_TYPE_LABELS[e.type] || { icon:'•', label: e.type, color:'#888' };
-    const dt = new Date(e.ts);
-    const timeStr = dt.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    return `
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #1e1e1e;">
-        <div style="font-size:1.1rem;margin-top:1px;flex-shrink:0;">${meta.icon}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.8rem;font-weight:700;color:${meta.color};">${meta.label}</span>
-            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;background:#222;border-radius:3px;padding:2px 7px;color:#ccc;">${e.userLabel || e.user}</span>
-          </div>
-          ${e.detail ? `<div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.78rem;color:#888;margin-top:3px;">${e.detail}</div>` : ''}
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:#444;margin-top:4px;letter-spacing:0.5px;">${timeStr}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ===================== INIT =====================
-let cardMode = '532';
-let cardSlotSelection = { 50:[], 30:[], 20:[], 40:[], '30b':[], '20b':[], 10:[] };
-let foodSelected = [...PEOPLE];
-
-window.addEventListener('load', async () => {
-  // Date
-  const now = new Date();
-  document.getElementById('date-display').textContent =
-    now.toLocaleDateString('vi-VN', {weekday:'long', day:'2-digit', month:'2-digit', year:'numeric'}).toUpperCase();
-
-  // Load audit
-  await loadAudit();
-  // Load passwords from Firestore
-  await loadPasswords();
-
-  // Restore session if previously logged in
-  const savedUser = sessionStorage.getItem('ghino_user');
-  if (savedUser && ACCOUNTS[savedUser]) {
-    currentUser = savedUser;
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('current-user-badge').style.display = 'flex';
-    document.getElementById('current-user-name').textContent = ACCOUNT_LABELS[savedUser].toUpperCase();
-  }
-
-  showStatus('⟳ Đang kết nối...', true);
-
-  // Populate selects
-  populateSelect('food-payer');
-  populateSelect('card-payer');
-  populateSelect('settle-from');
-  populateSelect('settle-to');
-
-  renderFoodParticipants();
-  renderCardSlots();
-  renderScore();
-  renderRandomList();
-
-  // Load from Firestore then listen for realtime changes
-  try {
-    const snap = await getDoc(DB_DOC);
-    if (snap.exists()) {
-      _db = snap.data();
-    }
-    showStatus('✔ Đã kết nối');
-    _dbReady = true;
-    renderLog();
-    calcDebts();
-    updateStats();
-
-    // Realtime listener — update UI when another device saves
-    onSnapshot(DB_DOC, (s) => {
-      if (s.exists()) {
-        _db = s.data();
-        renderLog();
-        calcDebts();
-        updateStats();
-        showStatus('🔄 Đồng bộ xong');
-      }
-    });
-  } catch(e) {
-    showStatus('✘ Không kết nối được: ' + e.message, false);
-    _dbReady = true;
-    renderLog();
-    calcDebts();
-    updateStats();
-  }
-});
-
-function populateSelect(id) {
-  const el = document.getElementById(id);
-  el.innerHTML = PEOPLE.map(p => `<option value="${p}">${p}</option>`).join('');
-}
-
-// ===================== TABS =====================
-function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  event.currentTarget.classList.add('active');
-  if (tab === 'home') { calcDebts(); updateStats(); }
-  if (tab === 'log') renderLog();
-  if (tab === 'audit') renderAudit();
-}
-
-// ===================== FOOD =====================
-let foodPurpose = '';
-
-function selectPurpose(el, value) {
-  document.querySelectorAll('#food-purpose-chips .purpose-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  foodPurpose = value;
-  document.getElementById('food-purpose-custom').value = '';
-}
-
-function onCustomPurposeInput() {
-  const val = document.getElementById('food-purpose-custom').value.trim();
-  document.querySelectorAll('#food-purpose-chips .purpose-chip').forEach(c => c.classList.remove('selected'));
-  foodPurpose = val;
-}
-
-function getFoodPurpose() {
-  return foodPurpose || '';
-}
-function renderFoodParticipants() {
-  const grid = document.getElementById('food-participants');
-  grid.innerHTML = PEOPLE.map(p => `
-    <div class="person-chip ${foodSelected.includes(p) ? 'selected' : ''}"
-         onclick="toggleFood('${p}',this)">${p}</div>
-  `).join('');
-}
-
-function toggleFood(name, el) {
-  if (foodSelected.includes(name)) {
-    foodSelected = foodSelected.filter(x => x !== name);
-    el.classList.remove('selected');
-  } else {
-    foodSelected.push(name);
-    el.classList.add('selected');
-  }
-  calcFoodPreview();
-}
-
-function calcFoodPreview() {
-  const amount = parseFloat(document.getElementById('food-amount').value) || 0;
-  if (!amount || foodSelected.length === 0) {
-    document.getElementById('food-preview').style.display = 'none';
-    return;
-  }
-  const share = Math.round(amount / foodSelected.length);
-  const payer = document.getElementById('food-payer').value;
-  const purpose = getFoodPurpose();
-  let html = '';
-  if (purpose) {
-    html += `<div style="font-size:0.82rem;color:var(--accent3);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;letter-spacing:0.5px;">${purpose}</div>`;
-  }
-  html += foodSelected.map(p => {
-    const owes = p === payer ? 0 : share;
-    return `<div class="debt-row"><span>${p}</span><span class="${owes > 0 ? 'amount-pos' : 'amount-zero'}">${owes > 0 ? '→ '+fmt(owes) : '✔ đã trả'}</span></div>`;
-  }).join('');
-  document.getElementById('food-preview-content').innerHTML = html;
-  document.getElementById('food-preview').style.display = 'block';
-}
-
-async function saveFood() {
-  const amount = parseFloat(document.getElementById('food-amount').value) || 0;
-  if (!amount) { showToast('Nhập số tiền!', true); return; }
-  if (foodSelected.length < 2) { showToast('Chọn ít nhất 2 người!', true); return; }
-  const payer = document.getElementById('food-payer').value;
-  const purpose = getFoodPurpose();
-  const share = Math.round(amount / foodSelected.length);
-  const purposeLabel = purpose ? purpose + ' — ' : '';
-  _db.transactions.push({
-    id: Date.now(),
-    type: 'food',
-    date: new Date().toISOString(),
-    amount,
-    payer,
-    purpose,
-    participants: [...foodSelected],
-    share,
-    details: `${purposeLabel}Chia đều ${foodSelected.join(', ')} — ${fmt(share)}/người`
-  });
-  showToast('Đã chia tiền!');
-  auditEvent('save_food', `${fmt(amount)} — ${payer} trả — ${foodSelected.join(', ')}`);
-  resetFood();
-  renderLog();
-  updateStats();
-  calcDebts();
-  await saveDB(_db);
-}
-
-function resetFood() {
-  document.getElementById('food-amount').value = '';
-  document.getElementById('food-purpose-custom').value = '';
-  document.querySelectorAll('#food-purpose-chips .purpose-chip').forEach(c => c.classList.remove('selected'));
-  foodPurpose = '';
-  foodSelected = [...PEOPLE];
-  renderFoodParticipants();
-  document.getElementById('food-preview').style.display = 'none';
-}
-
-// ===================== CARD =====================
-function setCardMode(mode) {
-  cardMode = mode;
-  document.getElementById('mode-532').classList.toggle('active', mode === '532');
-  document.getElementById('mode-4321').classList.toggle('active', mode === '4321');
-  document.getElementById('card-slots-532').style.display = mode === '532' ? '' : 'none';
-  document.getElementById('card-slots-4321').style.display = mode === '4321' ? '' : 'none';
-  // reset selections
-  Object.keys(cardSlotSelection).forEach(k => cardSlotSelection[k] = []);
-  renderCardSlots();
-  document.getElementById('card-preview').style.display = 'none';
-}
-
-function renderCardSlots() {
-  const slots532 = [
-    { id:'slot-50', key:'50', cls:'p50' },
-    { id:'slot-30', key:'30', cls:'p30' },
-    { id:'slot-20', key:'20', cls:'p20' },
-  ];
-  const slots4321 = [
-    { id:'slot-40', key:'40', cls:'p40' },
-    { id:'slot-30b', key:'30b', cls:'p30' },
-    { id:'slot-20b', key:'20b', cls:'p20' },
-    { id:'slot-10', key:'10', cls:'p10' },
-  ];
-  const slots = cardMode === '532' ? slots532 : slots4321;
-  slots.forEach(s => {
-    const el = document.getElementById(s.id);
-    if (!el) return;
-    el.innerHTML = PEOPLE.map(p => `
-      <div class="person-chip ${cardSlotSelection[s.key]?.includes(p) ? s.cls : ''}"
-           onclick="toggleCardSlot('${p}','${s.key}','${s.cls}',this)">${p}</div>
-    `).join('');
-  });
-}
-
-function toggleCardSlot(name, key, cls, el) {
-  // remove from all slots first for this mode
-  const keys532 = ['50','30','20'];
-  const keys4321 = ['40','30b','20b','10'];
-  const allKeys = cardMode === '532' ? keys532 : keys4321;
-  allKeys.forEach(k => {
-    cardSlotSelection[k] = cardSlotSelection[k].filter(x => x !== name);
-  });
-  // re-render all to clear
-  renderCardSlots();
-  // add to this slot
-  cardSlotSelection[key].push(name);
-  // find and highlight
-  const slotEl = document.getElementById(cardMode === '532'
-    ? ['slot-50','slot-30','slot-20'][['50','30','20'].indexOf(key)]
-    : ['slot-40','slot-30b','slot-20b','slot-10'][['40','30b','20b','10'].indexOf(key)]
-  );
-  if (slotEl) {
-    slotEl.querySelectorAll('.person-chip').forEach(chip => {
-      if (chip.textContent === name) chip.classList.add(cls);
-    });
-  }
-  calcCardPreview();
-}
-
-function calcCardPreview() {
-  const amount = parseFloat(document.getElementById('card-amount').value) || 0;
-  if (!amount) { document.getElementById('card-preview').style.display='none'; return; }
-  const payer = document.getElementById('card-payer').value;
-  let rows = '';
-  if (cardMode === '532') {
-    const slots = [
-      { key:'50', pct:0.5, label:'50%' },
-      { key:'30', pct:0.3, label:'30%' },
-      { key:'20', pct:0.2, label:'20%' },
-    ];
-    slots.forEach(s => {
-      cardSlotSelection[s.key].forEach(p => {
-        const owe = Math.round(amount * s.pct);
-        rows += `<div class="debt-row"><span>${p} <small style="color:var(--muted)">(${s.label})</small></span><span class="${p===payer?'amount-zero':'amount-pos'}">${p===payer?'✔ đã trả':fmt(owe)}</span></div>`;
-      });
-    });
-  } else {
-    const slots = [
-      { key:'40', pct:0.4, label:'40%' },
-      { key:'30b', pct:0.3, label:'30%' },
-      { key:'20b', pct:0.2, label:'20%' },
-      { key:'10', pct:0.1, label:'10%' },
-    ];
-    slots.forEach(s => {
-      cardSlotSelection[s.key].forEach(p => {
-        const owe = Math.round(amount * s.pct);
-        rows += `<div class="debt-row"><span>${p} <small style="color:var(--muted)">(${s.label})</small></span><span class="${p===payer?'amount-zero':'amount-pos'}">${p===payer?'✔ đã trả':fmt(owe)}</span></div>`;
-      });
-    });
-  }
-  if (!rows) rows = '<div class="empty" style="padding:10px">Chọn người cho từng mức</div>';
-  document.getElementById('card-preview-content').innerHTML = rows;
-  document.getElementById('card-preview').style.display = 'block';
-}
-
-async function saveCard() {
-  const amount = parseFloat(document.getElementById('card-amount').value) || 0;
-  if (!amount) { showToast('Nhập số tiền!', true); return; }
-  const payer = document.getElementById('card-payer').value;
-
-  let breakdown = [];
-  if (cardMode === '532') {
-    [['50',0.5],['30',0.3],['20',0.2]].forEach(([k,pct]) => {
-      cardSlotSelection[k].forEach(p => breakdown.push({ person:p, pct, amount: Math.round(amount*pct) }));
-    });
-  } else {
-    [['40',0.4],['30b',0.3],['20b',0.2],['10',0.1]].forEach(([k,pct]) => {
-      cardSlotSelection[k].forEach(p => breakdown.push({ person:p, pct, amount: Math.round(amount*pct) }));
-    });
-  }
-
-  if (breakdown.length === 0) { showToast('Chọn người chơi!', true); return; }
-
-  _db.transactions.push({
-    id: Date.now(),
-    type: 'card',
-    date: new Date().toISOString(),
-    amount,
-    payer,
-    mode: cardMode,
-    breakdown,
-    details: breakdown.map(b => `${b.person}:${Math.round(b.pct*100)}%`).join(', ')
-  });
-  showToast('Đã lưu đánh bài!');
-  auditEvent('save_card', `${fmt(amount)} — ${payer} trả — ${breakdown.map(b=>b.person+':'+Math.round(b.pct*100)+'%').join(', ')}`);
-  resetCard();
-  renderLog();
-  updateStats();
-  calcDebts();
-  await saveDB(_db);
-}
-
-function resetCard() {
-  document.getElementById('card-amount').value = '';
-  Object.keys(cardSlotSelection).forEach(k => cardSlotSelection[k] = []);
-  renderCardSlots();
-  document.getElementById('card-preview').style.display = 'none';
-}
-
-// ===================== DEBT CALC =====================
-function calcDebts() {
-  const db = _db;
-  // Build net balance: positive = they are owed money, negative = they owe money
-  const balance = {};
-  PEOPLE.forEach(p => balance[p] = 0);
-
-  // Re-compute correctly using raw flows
-  db.transactions.forEach(tx => {
-    if (tx.type === 'food') {
-      const share = Math.round(tx.amount / tx.participants.length);
-      tx.participants.forEach(p => {
-        if (p !== tx.payer) {
-          balance[p] -= share;
-          balance[tx.payer] += share;
-        }
-      });
-    } else if (tx.type === 'card') {
-      tx.breakdown.forEach(b => {
-        if (b.person !== tx.payer) {
-          balance[b.person] -= b.amount;
-          balance[tx.payer] += b.amount;
-        }
-      });
-    }
-  });
-
-  // Apply settlements
-  db.settlements.forEach(s => {
-    balance[s.from] += s.amount;
-    balance[s.to] -= s.amount;
-  });
-
-  // Generate transfer suggestions
-  const debtors = PEOPLE.filter(p => balance[p] < 0).map(p => ({ name: p, amt: balance[p] }));
-  const creditors = PEOPLE.filter(p => balance[p] > 0).map(p => ({ name: p, amt: balance[p] }));
-  const transfers = [];
-
-  const d2 = debtors.map(x => ({...x}));
-  const c2 = creditors.map(x => ({...x}));
-
-  let ci = 0, di = 0;
-  while (di < d2.length && ci < c2.length) {
-    const pay = Math.min(-d2[di].amt, c2[ci].amt);
-    if (pay > 0) transfers.push({ from: d2[di].name, to: c2[ci].name, amount: pay });
-    d2[di].amt += pay;
-    c2[ci].amt -= pay;
-    if (d2[di].amt === 0) di++;
-    if (c2[ci].amt === 0) ci++;
-  }
-
-  // Render
-  let html = '';
-  PEOPLE.forEach(p => {
-    const b = balance[p];
-    let statusHTML = '';
-    const related = transfers.filter(t => t.from === p || t.to === p);
-    if (Math.abs(b) < 1) {
-      statusHTML = `<div class="debt-row"><span>Không nợ ai</span><span class="amount-zero">✔ Hòa</span></div>`;
-    } else {
-      related.forEach(t => {
-        if (t.from === p) {
-          statusHTML += `<div class="debt-row"><span>→ Cần trả <strong>${t.to}</strong></span><span class="amount-pos">${fmt(t.amount)}</span></div>`;
-        } else {
-          statusHTML += `<div class="debt-row"><span>← Được nhận từ <strong>${t.from}</strong></span><span class="amount-neg">${fmt(t.amount)}</span></div>`;
-        }
-      });
-    }
-    html += `
-      <div class="debt-result">
-        <div class="debt-name">${p} <span style="font-size:0.85rem;color:${b>0?'var(--accent3)':b<0?'var(--accent2)':'var(--muted)'}">
-          [${b>0?'+'+fmt(b):fmt(b)}]
-        </span></div>
-        ${statusHTML}
-      </div>`;
-  });
-
-  document.getElementById('debt-results').innerHTML = html || '<div class="empty">Không có dữ liệu</div>';
-
-  if (transfers.length > 0) {
-    const box = document.getElementById('suggest-box');
-    box.style.display = 'block';
-    box.innerHTML = `
-      <div class="summary-box">
-        <div class="summary-title">💡 Cần thanh toán</div>
-        ${transfers.map(t => `
-          <div class="transfer-row">
-            <strong>${t.from}</strong>
-            <span class="arrow">→</span>
-            <strong>${t.to}</strong>
-            <span class="amount-pos" style="margin-left:auto">${fmt(t.amount)}</span>
-          </div>`).join('')}
-      </div>`;
-  } else {
-    document.getElementById('suggest-box').style.display = 'none';
-  }
-}
-
-// ===================== SETTLE =====================
-async function settleDebt() {
-  const from = document.getElementById('settle-from').value;
-  const to = document.getElementById('settle-to').value;
-  const amount = parseFloat(document.getElementById('settle-amount').value) || 0;
-  const purpose = document.getElementById('settle-purpose').value.trim();
-
-  if (from === to) {
-    showToast('Người trả và nhận phải khác nhau!', true);
-    return;
-  }
-
-  if (!amount) {
-    showToast('Nhập số tiền!', true);
-    return;
-  }
-
-  // dùng chung 1 id
-  const settleId = Date.now();
-
-  _db.settlements.push({
-    id: settleId,
-    date: new Date().toISOString(),
-    from,
-    to,
-    amount,
-    purpose
-  });
-
-  _db.transactions.push({
-    id: settleId,
-    type: 'settle',
-    date: new Date().toISOString(),
-    amount,
-    payer: from,
-    purpose,
-    details: `${from} trả ${to} ${fmt(amount)}${purpose ? ' — ' + purpose : ''}`
-  });
-
-  document.getElementById('settle-amount').value = '';
-  document.getElementById('settle-purpose').value = '';
-
-  showToast(`${from} đã trả ${to} ${fmt(amount)}`);
-  auditEvent('settle', `${from} → ${to}: ${fmt(amount)}${purpose ? ' (' + purpose + ')' : ''}`);
-
-  calcDebts();
-  updateStats();
-  renderLog();
-
-  await saveDB(_db);
-}
-
-// ===================== LOG =====================
-function renderLog() {
-  const db = _db;
-  const txns = [...db.transactions].reverse();
-  document.getElementById('log-count').textContent = txns.length + ' bản ghi';
-  if (txns.length === 0) {
-    document.getElementById('log-table-wrap').innerHTML = '<div class="empty">Chưa có giao dịch nào</div>';
-    return;
-  }
-  const rows = txns.map(tx => {
-    const d = new Date(tx.date);
-    const dateStr = d.toLocaleString('vi-VN');
-    const tagCls = tx.type === 'food' ? 'tag-food' : tx.type === 'card' ? 'tag-card' : 'tag-settle';
-    const tagLabel = tx.type === 'food' ? '💵 Chia tiền' : tx.type === 'card' ? '🃏 Bài' : '💸 Trả';
-    return `<tr>
-      <td style="color:var(--muted);font-size:0.78rem;font-family:'IBM Plex Mono',monospace;white-space:nowrap">${dateStr}</td>
-      <td><span class="tag ${tagCls}">${tagLabel}</span></td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent)">${fmt(tx.amount)}</td>
-      <td style="font-size:0.8rem;color:var(--muted)">${tx.details || ''}</td>
-      <td><button class="btn btn-danger" onclick="window.deleteLog(${tx.id})">✕</button></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('log-table-wrap').innerHTML = `
-    <table class="log-table">
-      <thead><tr>
-        <th>Ngày</th><th>Loại</th><th>Số tiền</th><th>Chi tiết</th><th></th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
-
-async function deleteLog(id) {
-  if (!confirm('Xóa giao dịch này?')) return;
-
-  const tx = _db.transactions.find(t => t.id === id);
-  auditEvent('delete_tx', tx ? `${tx.type} — ${fmt(tx.amount)} — ${tx.details || ''}` : `id:${id}`);
-
-  // settlement cũ + mới
-  if (tx && tx.type === 'settle') {
-
-    _db.settlements = _db.settlements.filter(s => {
-
-      // dữ liệu mới
-      if (s.id === id) return false;
-
-      // dữ liệu cũ
-      if (
-        s.from === tx.payer &&
-        s.amount === tx.amount
-      ) return false;
-
-      return true;
-    });
-  }
-
-  _db.transactions =
-    _db.transactions.filter(t => t.id !== id);
-
-  renderLog();
-  calcDebts();
-  updateStats();
-
-  await saveDB(_db);
-}
-
-async function clearLog() {
-  if (!confirm('Xóa TOÀN BỘ lịch sử? Không thể hoàn tác!')) return;
-  _db = { transactions: [], settlements: [] };
-  renderLog();
-  calcDebts();
-  updateStats();
-  await saveDB(_db);
-}
-
-// ===================== STATS =====================
-function updateStats() {
-  const db = _db;
-  let total = 0, food = 0, card = 0;
-  db.transactions.forEach(tx => {
-    if (tx.type === 'food') { food += tx.amount; total += tx.amount; }
-    if (tx.type === 'card') { card += tx.amount; total += tx.amount; }
-  });
-  document.getElementById('stat-total').textContent = fmt(total);
-  document.getElementById('stat-food').textContent = fmt(food);
-  document.getElementById('stat-card').textContent = fmt(card);
-  document.getElementById('stat-txns').textContent = db.transactions.length;
-}
-// ===================== SCORE =====================
-let scorePlayers = [
-  { id: crypto.randomUUID(), name:'Hùng', score:0 },
-  { id: crypto.randomUUID(), name:'Duy', score:0 },
-  { id: crypto.randomUUID(), name:'Mạnh', score:0 },
-  { id: crypto.randomUUID(), name:'Tú', score:0 },
-];
-
-let scoreHistory = [];
-let scoreDeleteMode = false;
-
-async function saveScoreData() {
-  try {
-    await setDoc(SCORE_DOC, { players: scorePlayers, history: scoreHistory });
-  } catch(e) { console.error('Score save error', e); }
-}
-
-// Load score from Firestore on init
-(async () => {
-  try {
-    const snap = await getDoc(SCORE_DOC);
-    if (snap.exists()) {
-      const d = snap.data();
-      scorePlayers = d.players || scorePlayers;
-      scoreHistory = d.history || [];
-    }
-    renderScore();
-  renderRandomList();
-    onSnapshot(SCORE_DOC, (s) => {
-      if (s.exists()) {
-        const d = s.data();
-        scorePlayers = d.players || [];
-        scoreHistory = d.history || [];
-        renderScore();
-  renderRandomList();
-      }
-    });
-  } catch(e) { renderScore(); }
-})();
-
-function renderScore() {
-  const wrap = document.getElementById('score-players');
-
-  wrap.innerHTML = scorePlayers.map(p => `
-    <div class="score-player"
-         ${scoreDeleteMode ? `onclick="window.scoreDeletePlayer('${p.id}')"` : ''}>
-
-      <input
-        class="score-add"
-        type="number"
-        placeholder="+"
-        enterkeyhint="done"
-        onkeydown="if(event.key==='Enter'){ this.blur(); }"
-        onblur="window.scoreAdd('${p.id}', this)"
-      >
-
-      <input
-        class="score-name"
-        type="text"
-        value="${p.name}"
-        onchange="window.scoreRename('${p.id}', this.value)"
-      >
-
-      <input
-        class="score-total"
-        type="number"
-        value="${p.score}"
-        onchange="window.scoreEdit('${p.id}', this.value)"
-      >
+<!-- ========== MODAL POPUPS ========== -->
+<!-- Modal xem QR nhanh -->
+<div id="qr-modal" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000;
+  display:none; align-items:center; justify-content:center;
+  font-family:'IBM Plex Sans',sans-serif;
+">
+  <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:24px; width:90%; max-width:400px; position:relative; text-align:center;">
+    <button id="close-qr-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer; outline:none;">&times;</button>
+    <div id="qr-modal-title" style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:1px; color:var(--accent); margin-bottom:16px;">MÃ QR THANH TOÁN</div>
+    <div id="qr-modal-body" style="background:#111; border:1px solid var(--border); border-radius:6px; min-height:250px; display:flex; align-items:center; justify-content:center; padding:10px;">
+      <!-- QR Image will be injected here -->
     </div>
-  `).join('');
-
-  renderScoreHistory();
-}
-
-async function scoreAdd(id, input) {
-  const val = parseInt(input.value);
-  if (isNaN(val)) { input.value = ''; return; }
-  const p = scorePlayers.find(x => x.id === id);
-  if (!p) return;
-  p.score += val;
-  scoreHistory.push({ type: 'add', entryId: crypto.randomUUID(), id, value: val, date: Date.now() });
-  auditEvent('score_add', `+${val} cho ${p.name}`);
-  input.value = '';
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-async function scoreRename(id, name) {
-  const p = scorePlayers.find(x => x.id === id);
-  if (!p) return;
-  p.name = name;
-  await saveScoreData();
-}
-
-async function scoreEdit(id, value) {
-  const p = scorePlayers.find(x => x.id === id);
-  if (!p) return;
-  const val = parseInt(value);
-  if (isNaN(val)) return;
-  p.score = val;
-  await saveScoreData();
-}
-
-async function scoreAddPlayer() {
-  scorePlayers.push({ id: crypto.randomUUID(), name: 'New', score: 0 });
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-function scoreToggleDelete() {
-  scoreDeleteMode = !scoreDeleteMode;
-  const btn = document.getElementById('score-delete-btn');
-  btn.style.opacity = scoreDeleteMode ? '1' : '0.6';
-  renderScore();
-  renderRandomList();
-}
-
-async function scoreDeletePlayer(id) {
-  if (!scoreDeleteMode) return;
-  if (!requirePassword()) return;
-  if (!confirm('Xóa người này?')) return;
-  scorePlayers = scorePlayers.filter(p => p.id !== id);
-  scoreHistory = scoreHistory.filter(h => h.id !== id);
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-function requirePassword() {
-  const pw = prompt('Nhập mật khẩu tài khoản của bạn:');
-  if (!currentUser || ACCOUNTS[currentUser] !== pw) { showToast('Sai mật khẩu!', true); return false; }
-  return true;
-}
-
-async function scoreUndo() {
-  // kept for internal use, not exposed via button
-  const undoneTargets = scoreHistory.filter(h => h.type === 'undo').map(h => h.target);
-  const lastAction = [...scoreHistory].reverse().find(h => h.type !== 'undo' && h.type !== 'delete' && !undoneTargets.includes(h.entryId));
-  if (!lastAction) { showToast('Không có gì để undo', true); return; }
-  const p = scorePlayers.find(x => x.id === lastAction.id);
-  if (p) p.score -= lastAction.value;
-  scoreHistory.push({ type: 'undo', target: lastAction.entryId, id: lastAction.id, value: lastAction.value, date: Date.now() });
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-async function scoreRemoveHistory(entryId) {
-  // X button = undo that entry, no password needed
-  const item = scoreHistory.find(h => h.entryId === entryId);
-  if (!item) return;
-  const alreadyUndone = scoreHistory.some(h => h.type === 'undo' && h.target === entryId);
-  if (alreadyUndone) return;
-  const p = scorePlayers.find(x => x.id === item.id);
-  if (p) p.score -= item.value;
-  scoreHistory.push({ type: 'undo', target: entryId, id: item.id, value: item.value, date: Date.now() });
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-function renderScoreHistory() {
-  const h = document.getElementById('score-history');
-
-  const addEntries = scoreHistory.filter(item => item.type === 'add' || (!item.type));
-  const deletedTargets = new Set(scoreHistory.filter(h => h.type === 'delete').map(h => h.target));
-  const undoneTargets = new Set(scoreHistory.filter(h => h.type === 'undo').map(h => h.target));
-
-  if (addEntries.length === 0) {
-    h.innerHTML = '<div class="empty">Chưa có lịch sử</div>';
-    return;
-  }
-
-  h.innerHTML = addEntries.slice().reverse().map((item) => {
-    const p = scorePlayers.find(x => x.id === item.id);
-    const isDeleted = deletedTargets.has(item.entryId);
-    const isUndone = undoneTargets.has(item.entryId);
-
-    let statusBadge = '';
-    if (isDeleted) {
-      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--accent2);margin-left:6px;">DELETED</span>';
-    } else if (isUndone) {
-      statusBadge = '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.65rem;color:var(--muted);margin-left:6px;">↩ UNDONE</span>';
-    }
-
-    const nameStyle = (isDeleted || isUndone) ? 'text-decoration:line-through;opacity:0.4;' : '';
-
-    const actionBtn = (!isDeleted && !isUndone)
-      ? `<button class="btn btn-ghost" style="font-size:0.7rem;padding:5px 10px;color:var(--muted);"
-           onclick="window.scoreRemoveHistory('${item.entryId}')">↩ Undo</button>`
-      : `<span style="width:62px;display:inline-block;"></span>`;
-
-    const date = item.date ? new Date(item.date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
-
-    return `
-      <div class="score-history-item" style="${isDeleted || isUndone ? 'opacity:0.5;' : ''}">
-        <div style="${nameStyle}">
-          <strong>${p ? p.name : '?'}</strong>
-          <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent3);margin-left:4px;">+${item.value}</span>
-          ${statusBadge}
-          ${date ? `<span style="font-size:0.68rem;color:var(--muted);margin-left:8px;">${date}</span>` : ''}
-        </div>
-        ${actionBtn}
-      </div>
-    `;
-  }).join('');
-}
-
-async function scoreReset() {
-  if (!requirePassword()) return;
-  if (!confirm('Reset toan bo diem va lich su?')) return;
-  auditEvent('score_reset', 'Reset toan bo diem va lich su');
-  scorePlayers = [];
-  scoreHistory = [];
-  await saveScoreData();
-  renderScore();
-  renderRandomList();
-}
-
-// ===================== RANDOM WHEEL =====================
-let randomPlayers = [
-  'Tú',
-  'Mạnh',
-  'Hùng',
-  'Duy',
-  'Trâm'
-];
-
-let currentRotation = 0;
-
-function renderRandomList() {
-
-  const wrap = document.getElementById('random-list');
-
-  const weights = calculateWeights();
-
-  wrap.innerHTML = randomPlayers.map((p, index) => `
-    <div class="random-row">
-
-      <input
-        type="text"
-        value="${p}"
-        onchange="updateRandomName(${index}, this.value)"
-      >
-
-      <div class="random-percent">
-        🎲
-      </div>
-
-      <button
-        class="btn btn-danger"
-        onclick="removeRandomPerson(${index})">
-        X
-      </button>
-
-    </div>
-  `).join('');
-
-  drawWheel();
-}
-
-function addRandomPerson() {
-  randomPlayers.push('New');
-  renderRandomList();
-}
-
-function removeRandomPerson(index) {
-  randomPlayers.splice(index, 1);
-  renderRandomList();
-}
-
-function updateRandomName(index, value) {
-  randomPlayers[index] = value;
-  renderRandomList();
-}
-
-function calculateWeights() {
-  const weights = {};
-  if (randomPlayers.length === 0) return weights;
-
-  const equalChance = 100 / randomPlayers.length;
-  randomPlayers.forEach(p => {
-    weights[p] = equalChance;
-  });
-
-  return weights;
-}
-
-function getBalances() {
-
-  const balance = {};
-
-  PEOPLE.forEach(p => balance[p] = 0);
-
-  _db.transactions.forEach(tx => {
-
-    if (tx.type === 'food') {
-
-      const share = Math.round(tx.amount / tx.participants.length);
-
-      tx.participants.forEach(p => {
-
-        if (p !== tx.payer) {
-          balance[p] -= share;
-          balance[tx.payer] += share;
-        }
-      });
-    }
-
-    else if (tx.type === 'card') {
-
-      tx.breakdown.forEach(b => {
-
-        if (b.person !== tx.payer) {
-          balance[b.person] -= b.amount;
-          balance[tx.payer] += b.amount;
-        }
-      });
-    }
-  });
-
-  _db.settlements.forEach(s => {
-    balance[s.from] += s.amount;
-    balance[s.to] -= s.amount;
-  });
-
-  return balance;
-}
-
-function drawWheel() {
-
-  const canvas = document.getElementById('wheel');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  const size = canvas.width;
-  const center = size / 2;
-  const radius = center - 8;
-
-  ctx.clearRect(0, 0, size, size);
-
-  const colors = [
-    '#e84a4a',
-    '#4ae8a0',
-    '#e8c84a',
-    '#9a4ae8',
-    '#4a9ae8',
-    '#e89a4a',
-    '#ff6b81',
-    '#2ed573'
-  ];
-
-  const total = randomPlayers.length;
-
-  if (total === 0) return;
-
-  const sliceAngle = (Math.PI * 2) / total;
-
-  for (let i = 0; i < total; i++) {
-
-    const startAngle = (-Math.PI / 2) + (i * sliceAngle);
-    const endAngle = startAngle + sliceAngle;
-    const midAngle = startAngle + (sliceAngle / 2);
-
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, radius, startAngle, endAngle);
-    ctx.closePath();
-
-    ctx.fillStyle = colors[i % colors.length];
-    ctx.fill();
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // TEXT
-    ctx.save();
-
-    ctx.translate(center, center);
-    ctx.rotate(midAngle);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-
-    ctx.fillText(
-      randomPlayers[i],
-      radius * 0.45,
-      0
-    );
-
-    ctx.restore();
-  }
-}
-
-function weightedPick(weights) {
-
-  const rand = Math.random() * 100;
-
-  let cumulative = 0;
-
-  for (const name in weights) {
-
-    cumulative += weights[name];
-
-    if (rand <= cumulative) {
-      return name;
-    }
-  }
-
-  return Object.keys(weights)[0];
-}
-
-function spinWheel() {
-  if (randomPlayers.length === 0) return;
-
-  const weights = calculateWeights();
-  const winner = weightedPick(weights);
-  const canvas = document.getElementById('wheel');
-
-  const winnerIndex = randomPlayers.indexOf(winner);
-  const slice = 360 / randomPlayers.length;
-
-  const randomOffset = (Math.random() * 0.8 + 0.1) * slice;
-  const neededRotation = 360 - (winnerIndex * slice) - randomOffset;
-
-  const baseRotation = Math.floor(currentRotation / 360) * 360;
-  const extraSpin = 360 * 5;
-
-  currentRotation = baseRotation + extraSpin + neededRotation;
-  canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-  setTimeout(() => {
-    document.getElementById('random-result').innerHTML = `🎉 ${winner}`;
-    showToast(`Random ra: ${winner}`);
-  }, 5200);
-}
-
-
-// ===================== UTILS =====================
-function fmt(n) {
-  if (!n && n !== 0) return '0đ';
-  return Math.round(n).toLocaleString('vi-VN') + 'đ';
-}
-
-function showToast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = isError ? 'var(--accent2)' : 'var(--accent3)';
-  t.style.color = '#111';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ===================== EXPOSE TO WINDOW (required for type="module") =====================
-Object.assign(window, {
-  switchTab, selectPurpose, onCustomPurposeInput, toggleFood, calcFoodPreview,
-  saveFood, resetFood, setCardMode, toggleCardSlot, calcCardPreview, saveCard,
-  resetCard, calcDebts, settleDebt, renderLog, deleteLog, clearLog, updateStats,
-  scoreAdd, scoreRename, scoreEdit, scoreAddPlayer, scoreToggleDelete,
-  scoreDeletePlayer, scoreUndo, scoreRemoveHistory, scoreReset, populateSelect,
-  addRandomPerson, removeRandomPerson, updateRandomName, spinWheel,
-  selectLoginUser, doLogin, doLogout, renderAudit, changePassword
-});
-</script>
+    <div id="qr-modal-desc" style="font-family:'IBM Plex Mono',monospace; font-size:0.85rem; color:var(--muted); margin-top:14px; word-break:break-all;"></div>
+  </div>
+</div>
+
+<!-- Modal xem Bill phóng to (Lightbox) -->
+<div id="lightbox-modal" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000;
+  display:none; align-items:center; justify-content:center;
+  cursor:pointer;
+">
+  <button id="close-lightbox" style="position:absolute; top:20px; right:30px; background:none; border:none; color:#fff; font-size:2.5rem; cursor:pointer; outline:none;">&times;</button>
+  <img id="lightbox-img" src="" alt="Bill Receipt" style="max-width:90%; max-height:90%; border-radius:6px; border:2px solid var(--border); object-fit:contain;" />
+</div>
+
+<!-- Main Javascript Module Entry Point -->
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>
