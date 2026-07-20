@@ -1,7 +1,7 @@
 import { setDoc } from "firebase/firestore";
 import { SCORE_DOC } from "../firebase/config";
 import { state } from "../utils/state";
-import { showToast } from "../utils/helpers";
+import { showToast, ACCOUNT_LABELS } from "../utils/helpers";
 import { auditEvent } from "../auth/audit";
 
 export async function saveScoreData() {
@@ -81,12 +81,14 @@ export async function scoreAdd(id, input) {
   const p = state.scorePlayers.find(x => x.id === id);
   if (!p) return;
   p.score += val;
+  const addedByName = state.currentUser ? (ACCOUNT_LABELS[state.currentUser] || state.currentUser) : 'Hệ thống';
   state.scoreHistory.push({
     type: 'add',
     entryId: crypto.randomUUID(),
     id,
     value: val,
-    date: Date.now()
+    date: Date.now(),
+    addedByName
   });
   auditEvent('score_add', `+${val} cho ${p.name}`);
   input.value = '';
@@ -201,12 +203,14 @@ export function renderScoreHistory() {
 
     const date = item.date ? new Date(item.date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
 
+    const addedByStr = item.addedByName ? `<span style="font-size:0.68rem;color:var(--muted);margin-left:8px;">(Ghi bởi: ${item.addedByName})</span>` : '';
     return `
       <div class="score-history-item" style="${isDeleted || isUndone ? 'opacity:0.5;' : ''}">
         <div style="${nameStyle}">
           <strong>${p ? p.name : '?'}</strong>
           <span style="font-family:'IBM Plex Mono',monospace;color:var(--accent3);margin-left:4px;">+${item.value}</span>
           ${statusBadge}
+          ${addedByStr}
           ${date ? `<span style="font-size:0.68rem;color:var(--muted);margin-left:8px;">${date}</span>` : ''}
         </div>
         ${actionBtn}

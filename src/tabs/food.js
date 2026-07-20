@@ -1,4 +1,4 @@
-import { PEOPLE, fmt, showToast } from "../utils/helpers";
+import { PEOPLE, fmt, showToast, ACCOUNT_LABELS } from "../utils/helpers";
 import { state, saveDB } from "../utils/state";
 import { auditEvent } from "../auth/audit";
 
@@ -77,6 +77,7 @@ export async function saveFood() {
   const share = Math.round(amount / state.foodSelected.length);
   const purposeLabel = purpose ? purpose + ' — ' : '';
 
+  const createdBy = ACCOUNT_LABELS[state.currentUser] || state.currentUser || 'Hệ thống';
   state.db.transactions.push({
     id: Date.now(),
     type: 'food',
@@ -86,7 +87,7 @@ export async function saveFood() {
     purpose,
     participants: [...state.foodSelected],
     share,
-    details: `${purposeLabel}Chia đều ${state.foodSelected.join(', ')} — ${fmt(share)}/người`
+    details: `${purposeLabel}${payer} trả — Chia đều ${state.foodSelected.join(', ')} — ${fmt(share)}/người (Nhập bởi: ${createdBy})`
   });
 
   showToast('Đã chia tiền!');
